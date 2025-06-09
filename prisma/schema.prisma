@@ -36,6 +36,7 @@ model fblog_categories {
   slug       String    @unique(map: "fblog_categories_slug_unique") @db.VarChar(155)
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
+
 }
 
 model fblog_category_fblog_post {
@@ -84,7 +85,7 @@ model fblog_post_fblog_tag {
 model fblog_posts {
   id               BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
   title            String             @db.VarChar(255)
-  slug             String             @db.VarChar(255)
+  slug             String             @db.VarChar(255) @unique
   sub_title        String?            @db.VarChar(255)
   body             String             @db.LongText
   status           fblog_posts_status @default(pending)
@@ -97,6 +98,7 @@ model fblog_posts {
   updated_at       DateTime?          @db.Timestamp(0)
 
   @@index([user_id], map: "fblog_posts_user_id_foreign")
+
 }
 
 model fblog_seo_details {
