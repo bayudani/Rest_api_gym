@@ -16,15 +16,6 @@
 
 ## ⚙️ Cara Install
 
-1. **Clone repo**
-
-```bash
-git clone https://github.com/namalo/gym-api.git
-cd gym-api
-
-```
-
-
 **Clone repo**
 
 ```
