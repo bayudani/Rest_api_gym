@@ -21,6 +21,13 @@ export default router;
 
 /**
  * @swagger
+ * tags:
+ *   name: Comment
+ *   description: Endpoints untuk komentar pengguna
+ */
+
+/**
+ * @swagger
  * /comment/article/{slug}:
  *   get:
  *     tags: [Comment]
@@ -39,7 +46,7 @@ export default router;
 
 /**
  * @swagger
- * /comments/article/{slug}:
+ * /comment/article/{slug}:
  *   post:
  *     tags: [Comment]
  *     summary: Kirim komentar ke artikel berdasarkan slug
@@ -68,9 +75,9 @@ export default router;
 
 /**
  * @swagger
- * /comments/{id}:
+ * /comment/{id}:
  *   delete:
- *     tags: [Comments]
+ *     tags: [Comment]
  *     summary: Hapus komentar
  *     security:
  *       - bearerAuth: []
