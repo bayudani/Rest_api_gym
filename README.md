@@ -24,22 +24,40 @@ cd gym-api
 
 ```
 
-    2.**Install dependencies**
+
+**Clone repo**
+
+```
+git clone https://github.com/namalo/gym-api.git
+cd gym-api
+```
+
+
+**Install dependencies**
 
 ```
 npm install
 ```
 
-3. **Setup environment variables**
 
-   ```
-   DATABASE_URL=postgresql://user:password@localhost:5432/namadb
-   JWT_SECRET=your_jwt_secret
-   PORT=3001
-   ```
-4. **Setup prisma**
+**Set up env**
 
-   ```
-   npx prisma migrate dev --name init
-   npx prisma generate
-   ```
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/namadb
+JWT_SECRET=your_jwt_secret
+PORT=3001
+```
+
+**Set up prisma**
+
+```
+npx prisma migrate dev --name init
+npx prisma generate
+
+```
+
+**Jalankan server**
+
+```
+npm run dev
+```
