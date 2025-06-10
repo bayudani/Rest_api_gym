@@ -21,7 +21,9 @@
     "morgan": "~1.9.1",
     "mysql2": "^3.14.1",
     "prisma": "^6.9.0",
-    "string-strip-html": "^13.4.12"
+    "string-strip-html": "^13.4.12",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

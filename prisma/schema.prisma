@@ -60,6 +60,10 @@ model fblog_comments {
   created_at  DateTime? @db.Timestamp(0)
   updated_at  DateTime? @db.Timestamp(0)
 
+// 👇 relasi
+  post        fblog_posts @relation(fields: [post_id], references: [id])
+  user        users       @relation(fields: [user_id], references: [id]) 
+
   @@index([post_id], map: "fblog_comments_post_id_foreign")
 }
 
@@ -96,6 +100,9 @@ model fblog_posts {
   user_id          BigInt             @db.UnsignedBigInt
   created_at       DateTime?          @db.Timestamp(0)
   updated_at       DateTime?          @db.Timestamp(0)
+
+// 👇 relasi (optional, kalau kamu mau ambil comments dari post)
+  comments         fblog_comments[]
 
   @@index([user_id], map: "fblog_posts_user_id_foreign")
 
@@ -278,6 +285,8 @@ model users {
   created_at         DateTime? @db.Timestamp(0)
   updated_at         DateTime? @db.Timestamp(0)
   profile_photo_path String?   @db.VarChar(255)
+
+   comments fblog_comments[]  
 }
 
 
