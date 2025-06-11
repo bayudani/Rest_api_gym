@@ -6,35 +6,35 @@ import authMiddleware from '../middleware/auth_middleware.js';
 const router = express.Router();
 
 
-router.post('/:id/like',authMiddleware, likePost);
-router.post('/:id/unlike',authMiddleware, unlikePost);
-router.get('/:id/likes', getLikeCount);
+router.post('/likes/:slug/like', authMiddleware, likePost);
+router.post('/likes/:slug/unlike', authMiddleware, unlikePost);
+router.get('/likes/:slug/likes', getLikeCount);
 
 /**
  * @swagger
  * tags:
  *   name: Likes
- *   description: Operasi like/unlike pada post
+ *   description: Operasi like/unlike pada artikel/post
  */
 
 /**
  * @swagger
- * /api/likes/{id}/like:
+ * /api/likes/{slug}/like:
  *   post:
- *     summary: Like sebuah post
+ *     summary: Like sebuah artikel
  *     tags: [Likes]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
- *         description: ID post yang ingin di-like
+ *         description: Slug dari artikel yang ingin di-like
  *     responses:
  *       200:
- *         description: Post berhasil di-like
+ *         description: Artikel berhasil di-like
  *         content:
  *           application/json:
  *             schema:
@@ -45,26 +45,26 @@ router.get('/:id/likes', getLikeCount);
  *       401:
  *         description: User belum login
  *       404:
- *         description: Post tidak ditemukan
+ *         description: Artikel tidak ditemukan
  *       409:
- *         description: Post sudah dilike sebelumnya
+ *         description: Artikel sudah di-like sebelumnya
  */
 
 /**
  * @swagger
- * /api/likes/{id}/unlike:
+ * /api/likes/{slug}/unlike:
  *   post:
- *     summary: Unlike sebuah post
+ *     summary: Unlike sebuah artikel
  *     tags: [Likes]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
- *         description: ID post yang ingin di-unlike
+ *         description: Slug dari artikel yang ingin di-unlike
  *     responses:
  *       200:
  *         description: Like berhasil dibatalkan
@@ -78,24 +78,24 @@ router.get('/:id/likes', getLikeCount);
  *       401:
  *         description: User belum login
  *       404:
- *         description: Post tidak ditemukan
+ *         description: Artikel tidak ditemukan
  *       409:
- *         description: Post belum di-like sebelumnya
+ *         description: Artikel belum di-like sebelumnya
  */
 
 /**
  * @swagger
- * /api/likes/{id}/likes:
+ * /api/likes/{slug}/likes:
  *   get:
- *     summary: Ambil jumlah like pada post
+ *     summary: Ambil jumlah like pada artikel
  *     tags: [Likes]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
- *         description: ID post
+ *         description: Slug dari artikel
  *     responses:
  *       200:
  *         description: Jumlah like berhasil diambil
@@ -107,6 +107,7 @@ router.get('/:id/likes', getLikeCount);
  *                 likes:
  *                   type: integer
  *       404:
- *         description: Post tidak ditemukan
+ *         description: Artikel tidak ditemukan
  */
+
 export default router;

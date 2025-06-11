@@ -26,15 +26,15 @@ export const getArticleBySlug = async (slug) => {
 // import prisma from '../prisma/db.js';
 
 // Cari post published berdasarkan ID
-export const findPublishedPostById = async (id) => {
-    return await prisma.fblog_posts.findFirst({
-        where: {
-            id: BigInt(id),
-            status: 'published',
-        },
-    });
+// Ambil post published berdasarkan slug
+export const findPublishedPostBySlug = async (slug) => {
+  return await prisma.fblog_posts.findFirst({
+    where: {
+      slug,
+      status: 'published',
+    },
+  });
 };
-
 
 export const checkLikeExists = async (postId, userId) => {
   const like = await prisma.post_likes.findUnique({
@@ -70,8 +70,10 @@ export const removeLike = async (postId, userId) => {
   });
 };
 
+
 export const countLikes = async (postId) => {
   return await prisma.post_likes.count({
     where: { post_id: BigInt(postId) },
   });
 };
+
