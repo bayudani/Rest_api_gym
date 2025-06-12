@@ -1,9 +1,12 @@
-import express from 'express';
-import { getMemberships, getMembershipByIds } from '../controller/membership_controller.js';
+import express from "express";
+import {
+    getMemberships,
+    getMembershipByIds,
+} from "../controller/membership_controller.js";
 
 const router = express.Router();
 // get all memberships
-router.get('/', getMemberships);
+router.get("/", getMemberships);
 // swagger documentation for get all memberships
 /**
  * @swagger
@@ -34,7 +37,7 @@ router.get('/', getMemberships);
  *                     format: date-time
  */
 // get membership by ID
-router.get('/:id', getMembershipByIds);
+router.get("/:id", getMembershipByIds);
 // swagger documentation for get membership by ID
 /**
  * @swagger

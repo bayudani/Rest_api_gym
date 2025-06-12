@@ -12,6 +12,7 @@ const authMiddleware = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded; // Langsung masukin seluruh payload
+        console.log("Decoded Token:", decoded.id);
         next();
     } catch (err) {
         return res.status(401).json({ message: 'Unauthorized: Token invalid' });

@@ -1,11 +1,12 @@
 import express from 'express';
-import { registerUser, login,profile } from '../controller/auth_controller.js';
+import { registerUser, login,profile,updateUserInfo, updateUserPassword } from '../controller/auth_controller.js';
+import authMiddleware from "../middleware/auth_middleware.js";
+
 
 const router = express.Router();
 
+
 router.post('/register', registerUser);
-router.post('/login', login);
-router.get('/profile', profile);
 
 /**
  * @swagger
@@ -49,6 +50,8 @@ router.get('/profile', profile);
  *         description: Email sudah terdaftar
  */
 
+router.post('/login', login);
+
 /**
  * @swagger
  * /auth/login:
@@ -80,6 +83,8 @@ router.get('/profile', profile);
  *         description: Email/password salah
  */
 
+router.get('/profile', profile);
+
 /**
  * @swagger
  * /auth/profile:
@@ -95,6 +100,83 @@ router.get('/profile', profile);
  *         description: Token tidak valid atau tidak ada
  *       404:
  *         description: User tidak ditemukan
+ */
+
+// swagger update user porfile
+router.put("/update", authMiddleware, updateUserInfo);
+/**
+ * @swagger
+ * /auth/update:
+ *   put:
+ *     summary: Update data profil user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Bayu Update
+ *               email:
+ *                 type: string
+ *                 example: bayu_update@example.com
+ *     responses:
+ *       200:
+ *         description: Profil berhasil diupdate
+ *       400:
+ *         description: Nama dan email wajib diisi
+ *       401:
+ *         description: Token tidak valid atau tidak ada
+ *       500:
+ *         description: Gagal update data user
+ */
+
+router.put("/update-password", authMiddleware, updateUserPassword);
+/**
+ * @swagger
+ * /auth/update-password:
+ *   put:
+ *     summary: Ganti password user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *               - confirmPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 example: secret123
+ *               newPassword:
+ *                 type: string
+ *                 example: baruBanget123
+ *               confirmPassword:
+ *                 type: string
+ *                 example: baruBanget123
+ *     responses:
+ *       200:
+ *         description: Password berhasil diupdate
+ *       400:
+ *         description: Password tidak cocok atau field belum lengkap
+ *       401:
+ *         description: Password lama salah
+ *       500:
+ *         description: Gagal update password
  */
 
 
