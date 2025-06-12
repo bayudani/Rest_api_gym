@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -36,7 +35,6 @@ model fblog_categories {
   slug       String    @unique(map: "fblog_categories_slug_unique") @db.VarChar(155)
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
-
 }
 
 model fblog_category_fblog_post {
@@ -59,10 +57,6 @@ model fblog_comments {
   approved_at DateTime? @db.DateTime(0)
   created_at  DateTime? @db.Timestamp(0)
   updated_at  DateTime? @db.Timestamp(0)
-
-// 👇 relasi
-  post        fblog_posts @relation(fields: [post_id], references: [id])
-  user        users       @relation(fields: [user_id], references: [id]) 
 
   @@index([post_id], map: "fblog_comments_post_id_foreign")
 }
@@ -89,7 +83,7 @@ model fblog_post_fblog_tag {
 model fblog_posts {
   id               BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
   title            String             @db.VarChar(255)
-  slug             String             @db.VarChar(255) @unique
+  slug             String             @db.VarChar(255)
   sub_title        String?            @db.VarChar(255)
   body             String             @db.LongText
   status           fblog_posts_status @default(pending)
@@ -101,11 +95,7 @@ model fblog_posts {
   created_at       DateTime?          @db.Timestamp(0)
   updated_at       DateTime?          @db.Timestamp(0)
 
-// 👇 relasi (optional, kalau kamu mau ambil comments dari post)
-  comments         fblog_comments[]
-
   @@index([user_id], map: "fblog_posts_user_id_foreign")
-
 }
 
 model fblog_seo_details {
@@ -251,7 +241,6 @@ model role_has_permissions {
   @@index([role_id], map: "role_has_permissions_role_id_foreign")
 }
 
-
 model roles {
   id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   name       String    @db.VarChar(255)
@@ -274,7 +263,6 @@ model sessions {
   @@index([user_id], map: "sessions_user_id_index")
 }
 
-
 model users {
   id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   name               String    @db.VarChar(255)
@@ -285,10 +273,16 @@ model users {
   created_at         DateTime? @db.Timestamp(0)
   updated_at         DateTime? @db.Timestamp(0)
   profile_photo_path String?   @db.VarChar(255)
-
-   comments fblog_comments[]  
 }
 
+model memberships {
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name            String    @db.VarChar(50)
+  duration_months Int
+  price           Decimal   @default(0.00) @db.Decimal(8, 2)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+}
 
 enum fblog_posts_status {
   published

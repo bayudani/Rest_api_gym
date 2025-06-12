@@ -48,12 +48,12 @@ export const registerUser = async (req, res) => {
         try {
             const user = await findUserByEmail(email);
             if (!user) {
-                return res.status(401).json({ error: "Email belum terdaftar bro!" });
+                return res.status(401).json({ error: "Email belum terdaftar!" });
             }
 
             const isValid = await bcrypt.compare(password, user.password);
             if (!isValid) {
-                return res.status(401).json({ error: "Password salah bro!" });
+                return res.status(401).json({ error: "Password salah!" });
             }
 
             const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {

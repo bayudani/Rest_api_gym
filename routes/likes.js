@@ -6,9 +6,9 @@ import authMiddleware from '../middleware/auth_middleware.js';
 const router = express.Router();
 
 
-router.post('/likes/:slug/like', authMiddleware, likePost);
-router.post('/likes/:slug/unlike', authMiddleware, unlikePost);
-router.get('/likes/:slug/likes', getLikeCount);
+router.post('/:slug/like', authMiddleware, likePost);
+router.post('/:slug/unlike', authMiddleware, unlikePost);
+router.get('/:slug/likes', getLikeCount);
 
 /**
  * @swagger
