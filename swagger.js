@@ -7,7 +7,7 @@ const swaggerDefinition = {
     info: {
         title: 'API FitID',
         version: '1.0.0',
-        description: 'Dokumentasi API FitID',
+        description: 'Dokumentasi API FitID, API gym kelompok gacor!!!!',
     },
     servers: [
         {

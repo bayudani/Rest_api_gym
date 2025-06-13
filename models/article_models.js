@@ -22,6 +22,7 @@ export const getArticleBySlug = async (slug) => {
     }
 };
 
+
 // add like to article
 // import prisma from '../prisma/db.js';
 
@@ -76,4 +77,3 @@ export const countLikes = async (postId) => {
     where: { post_id: BigInt(postId) },
   });
 };
-

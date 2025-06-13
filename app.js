@@ -1,18 +1,19 @@
-import dotenv from 'dotenv';
 import express from "express";
-dotenv.config();
+import dotenv from 'dotenv';
 import cors from 'cors';
-import authRoutes from "./routes/auth.js";
 import morgan from "morgan"; // <<== Tambahkan ini
 import {setupSwagger} from './swagger.js';
+import authRoutes from "./routes/auth.js";
 import posts from "./routes/article.js";
-// import categories from "./routes/category.js";
 import like from "./routes/likes.js";
 import comment from "./routes/comment.js";
 import membership from "./routes/membership.js";
+import transactions from "./routes/transactions.js";
 
 
 const app = express();
+dotenv.config();
+
 app.use(cors());
 // log with morgan
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
@@ -46,6 +47,7 @@ app.use("/api/posts", posts);
 app.use("/api/likes", like);
 app.use("/api/comment", comment);
 app.use("/api/memberships", membership);
+app.use("/api/transactions", transactions);
 // app.use("/api/categories", categories);
 
 // Tes endpoint root

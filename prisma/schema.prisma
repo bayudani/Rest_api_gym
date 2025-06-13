@@ -284,8 +284,52 @@ model memberships {
   updated_at      DateTime? @db.Timestamp(0)
 }
 
+model attends {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  member_profile_id BigInt    @db.UnsignedBigInt
+  scan_time         DateTime  @db.Timestamp(0)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+
+  @@index([member_profile_id], map: "attends_member_profile_id_foreign")
+}
+
+model member_profiles {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt @unique
+  full_name  String    @db.VarChar(50)
+  addres     String?   @db.VarChar(100)
+  phone      String?   @db.VarChar(20)
+  is_active  Boolean   @default(false)
+  start_date DateTime? @db.Date
+  end_date   DateTime? @db.Date
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "member_profiles_user_id_foreign")
+}
+
+model transactions {
+  id                    BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  userId                BigInt              @db.UnsignedBigInt
+  membership_package_id BigInt              @db.UnsignedBigInt
+  amount                Int
+  proof_image           String              @db.VarChar(255)
+  status                transactions_status @default(pending)
+  created_at            DateTime?           @db.Timestamp(0)
+  updated_at            DateTime?           @db.Timestamp(0)
+
+  @@index([membership_package_id], map: "transactions_membership_package_id_foreign")
+  @@index([userId], map: "transactions_userid_foreign")
+}
+
 enum fblog_posts_status {
   published
   scheduled
   pending
+}
+
+enum transactions_status {
+  pending
+  Confirmed
 }
