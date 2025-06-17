@@ -11,6 +11,29 @@ const router = express.Router();
 
 // Create a new transaction
 router.post('/',authMiddleware, createTransactionController);
-
+// swagger documentation for create transaction
+/**
+ * @swagger
+ * /transactions:
+ *   post:
+ *     summary: Create a new transaction
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               program_id:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Successfully created transaction
+ */
 
 export default router;

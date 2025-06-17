@@ -41,9 +41,11 @@ export const createMemberProfile = async (data) => {
 export const getMemberProfileByUserId = async (userId) => {
     return await prisma.member_profiles.findUnique({
         where: { user_id: BigInt(userId) }, // pakai userId dari parameter
-        include: {
-            user: true,
-            membership: true,
+        select: {
+            id: true,
+            full_name: true,
+            addres: true,
+            phone: true,
         },
     });
 };

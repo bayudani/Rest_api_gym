@@ -273,6 +273,9 @@ model users {
   created_at         DateTime? @db.Timestamp(0)
   updated_at         DateTime? @db.Timestamp(0)
   profile_photo_path String?   @db.VarChar(255)
+
+   // 🔥 Tambahin ini kalau 1 user punya 1 profile
+  member_profile   member_profiles?
 }
 
 model memberships {
@@ -308,6 +311,9 @@ model member_profiles {
   point      Int       @default(0)
 
   @@index([user_id], map: "member_profiles_user_id_foreign")
+
+   // 🔥 Tambahin ini:
+  user users @relation(fields: [user_id], references: [id])
 }
 
 model transactions {
