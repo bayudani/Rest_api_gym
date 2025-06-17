@@ -94,11 +94,11 @@ export const profile = async (req, res) => {
             return res.status(404).json({ error: "User tidak ditemukan!" });
         }
         res.status(200).json({
-            id: user.id.toString(),
+            // id: user.id.toString(),
             name: user.name,
             email: user.email,
-            created_at: user.created_at,
-            updated_at: user.updated_at,
+            // created_at: user.created_at,
+            // updated_at: user.updated_at,
         });
     } catch (err) {
         res.status(401).json({ error: "Token tidak valid!" });

@@ -305,6 +305,7 @@ model member_profiles {
   end_date   DateTime? @db.Date
   created_at DateTime? @db.Timestamp(0)
   updated_at DateTime? @db.Timestamp(0)
+  point      Int       @default(0)
 
   @@index([user_id], map: "member_profiles_user_id_foreign")
 }
@@ -323,6 +324,26 @@ model transactions {
   @@index([userId], map: "transactions_userid_foreign")
 }
 
+model programs {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String    @db.VarChar(255)
+  slug        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model rewards {
+  id                BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  member_profile_id BigInt                @db.UnsignedBigInt
+  reward_type       String                @default("Suplemen") @db.VarChar(255)
+  reward_status     rewards_reward_status @default(pending)
+  created_at        DateTime?             @db.Timestamp(0)
+  updated_at        DateTime?             @db.Timestamp(0)
+
+  @@index([member_profile_id], map: "rewards_member_profile_id_foreign")
+}
+
 enum fblog_posts_status {
   published
   scheduled
@@ -332,4 +353,9 @@ enum fblog_posts_status {
 enum transactions_status {
   pending
   Confirmed
+}
+
+enum rewards_reward_status {
+  pending
+  claimed
 }

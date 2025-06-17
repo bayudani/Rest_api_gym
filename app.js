@@ -9,6 +9,7 @@ import like from "./routes/likes.js";
 import comment from "./routes/comment.js";
 import membership from "./routes/membership.js";
 import transactions from "./routes/transactions.js";
+import member from "./routes/member.js";
 
 
 const app = express();
@@ -48,6 +49,7 @@ app.use("/api/likes", like);
 app.use("/api/comment", comment);
 app.use("/api/memberships", membership);
 app.use("/api/transactions", transactions);
+app.use("/api/member", member);
 // app.use("/api/categories", categories);
 
 // Tes endpoint root
