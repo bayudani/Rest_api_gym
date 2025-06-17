@@ -1,5 +1,5 @@
 import express from "express";
-import {getMemberProfile} from "../controller/member_controller.js";
+import {getMemberProfile,getMemberPoint} from "../controller/member_controller.js";
 import authMiddleware from '../middleware/auth_middleware.js';
 
 const router = express.Router();
@@ -31,5 +31,30 @@ router.get("/profile", authMiddleware, getMemberProfile);
  *                   type: string
  *                 membership_status:
  *                   type: string
+ */
+
+// Get member point
+router.get("/point", authMiddleware,getMemberPoint);
+//  swagger documentation for get member point
+/**
+ * @swagger
+ * /member/point:
+ *   get:
+ *     summary: Get member point
+ *     tags: [Member]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved member point
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 point:
+ *                   type: integer
  */
 export default router;

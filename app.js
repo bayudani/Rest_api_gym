@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from "morgan"; // <<== Tambahkan ini
 import {setupSwagger} from './swagger.js';
+import { createProxyMiddleware } from "http-proxy-middleware";
 import authRoutes from "./routes/auth.js";
 import posts from "./routes/article.js";
 import like from "./routes/likes.js";
@@ -28,6 +29,16 @@ app.use((req, res, next) => {
   console.log(`${formatted} - ${ip} - ${req.method} ${req.originalUrl}`);
   next();
 });
+
+// Proxy untuk Laravel
+// Semua request ke /laravel/... akan diteruskan ke http://localhost:8000
+app.use('/laravel', createProxyMiddleware({
+  target: 'http://localhost:8000', // Alamat server Laravel kamu
+  changeOrigin: true,
+  pathRewrite: {
+    '^/laravel': '', // Hapus '/laravel' dari path sebelum diteruskan
+  },
+}));
 
 app.use(cors({
   origin: 'http://localhost:5173', // asal domain yang diizinkan

@@ -49,3 +49,14 @@ export const getMemberProfileByUserId = async (userId) => {
         },
     });
 };
+
+// get point member
+export const getMemberPointByUserId = async (userId) => {
+    return await prisma.member_profiles.findUnique({
+        where: { user_id: BigInt(userId) },
+        select: {
+            id: true,
+            point: true,
+        },
+    });
+};
