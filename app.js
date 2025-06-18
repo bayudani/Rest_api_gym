@@ -41,10 +41,10 @@ app.use('/laravel', createProxyMiddleware({
   },
 }));
 
-app.use(cors({
-  origin: 'http://localhost:5173', // asal domain yang diizinkan
-  credentials: true, // kalau pakai cookie
-}));
+// app.use(cors({
+//   origin: 'http://localhost:5173', // asal domain yang diizinkan
+//   credentials: true, // kalau pakai cookie
+// }));
 // bigint fix global
 BigInt.prototype.toJSON = function () {
   return this.toString();

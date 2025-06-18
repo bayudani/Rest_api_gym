@@ -60,3 +60,31 @@ export const getMemberPointByUserId = async (userId) => {
         },
     });
 };
+
+
+// get attends
+export const getMemberAttends = async (userId) => {
+    // cari member dlu
+    const profile = await prisma.member_profiles.findUnique({
+        where: {
+            user_id: BigInt(userId), // pastikan userId di sini sesuai dengan tipe data yang diharapkan
+        }
+    });
+    if (!profile) {
+        throw new Error("Member profile not found");
+    }
+    // ambil attends berdasarkan user_id
+    const attends = await prisma.attends.findMany({
+        where: {
+            member_profile_id:profile.id
+        },
+        orderBy:{
+            scan_time: "desc"
+        },
+        select:{
+            id: true,
+            scan_time: true,
+        }
+    });
+    return attends;
+};

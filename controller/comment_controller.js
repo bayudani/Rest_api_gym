@@ -10,11 +10,12 @@ import {
 
 export const listComments = async (req, res) => {
     try {
-        const comments = await getApprovedComments();
+        const { slug } = req.params; // pastikan kamu kirim slug dari frontend
+        const comments = await getCommentsByArticleSlug(slug);
 
         const formatted = comments.map(comment => ({
             id: comment.id,
-            content: comment.comment.replace(/<[^>]*>?/gm, ''),
+            content: comment.comment.replace(/<[^>]*>?/gm, ''), // bersihin tag HTML
             post_title: comment.post?.title ?? '[judul tidak ditemukan]',
             user_name: comment.user?.name ?? '[anonim]',
             created_at: comment.created_at.toISOString(),
@@ -22,9 +23,13 @@ export const listComments = async (req, res) => {
 
         res.json(formatted);
     } catch (error) {
-        res.status(500).json({ message: 'Gagal mengambil komentar.', error: error.message });
+        res.status(500).json({
+            message: 'Gagal mengambil komentar berdasarkan artikel.',
+            error: error.message
+        });
     }
 };
+
 
 export const postComment = async (req, res) => {
     const { post_id, comment } = req.body;

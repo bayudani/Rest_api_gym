@@ -13,21 +13,30 @@ export const getApprovedComments = async () => {
 };
 
 export const getCommentsByArticleSlug = async (slug) => {
+    const post = await prisma.fblog_posts.findFirst({
+        where: {
+            slug: slug,
+            status: 'published'
+        }
+    });
+
+    if (!post) return []; // atau null sesuai kebutuhanmu
+
     return await prisma.fblog_comments.findMany({
         where: {
             approved: true,
-            post: {
-                slug: slug,
-                status: 'published',
-            },
+            post_id: post.id
         },
         include: {
             user: true,
-            post: true,
+            post: true
         },
-        orderBy: { created_at: 'desc' },
+        orderBy: {
+            created_at: 'desc'
+        }
     });
 };
+
 
 export const checkCommentExists = async (postId, userId) => {
     return await prisma.fblog_comments.findFirst({
