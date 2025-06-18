@@ -312,6 +312,8 @@ model member_profiles {
 
   @@index([user_id], map: "member_profiles_user_id_foreign")
 
+ rewards    rewards[]
+
    // 🔥 Tambahin ini:
   user users @relation(fields: [user_id], references: [id])
 }
@@ -346,6 +348,9 @@ model rewards {
   reward_status     rewards_reward_status @default(pending)
   created_at        DateTime?             @db.Timestamp(0)
   updated_at        DateTime?             @db.Timestamp(0)
+
+  member_profile    member_profiles @relation(fields: [member_profile_id], references: [id])
+
 
   @@index([member_profile_id], map: "rewards_member_profile_id_foreign")
 }
