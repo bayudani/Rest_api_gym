@@ -50,8 +50,8 @@ model fblog_category_fblog_post {
 
 model fblog_comments {
   id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  user_id     BigInt    @db.UnsignedBigInt
-  post_id     BigInt    @db.UnsignedBigInt
+  user_id     BigInt    @db.UnsignedBigInt @unique
+  post_id     BigInt    @db.UnsignedBigInt @unique
   comment     String    @db.Text
   approved    Boolean   @default(false)
   approved_at DateTime? @db.DateTime(0)
@@ -83,7 +83,7 @@ model fblog_post_fblog_tag {
 model fblog_posts {
   id               BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
   title            String             @db.VarChar(255)
-  slug             String             @db.VarChar(255)
+  slug             String             @db.VarChar(255) @unique
   sub_title        String?            @db.VarChar(255)
   body             String             @db.LongText
   status           fblog_posts_status @default(pending)

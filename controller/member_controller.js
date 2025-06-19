@@ -21,6 +21,7 @@ export const getMemberProfile = async (req, res) => {
     }
 };
 
+
 // get point member
 export const getMemberPoint = async (req, res) => {
     const userId = req.user.id; // token udah sukses decoded
@@ -35,6 +36,7 @@ export const getMemberPoint = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // get member attends
 export const getMyAttends = async (req, res) => {

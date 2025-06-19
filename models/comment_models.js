@@ -29,11 +29,11 @@ export const getCommentsByArticleSlug = async (slug) => {
         },
         include: {
             user: true,
-            post: true
+            // post: true
         },
-        orderBy: {
-            created_at: 'desc'
-        }
+        // orderBy: {
+        //     created_at: 'desc'
+        // }
     });
 };
 
