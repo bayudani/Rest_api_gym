@@ -40,15 +40,22 @@ export const createMemberProfile = async (data) => {
 
 export const getMemberProfileByUserId = async (userId) => {
     return await prisma.member_profiles.findUnique({
-        where: { user_id: BigInt(userId) }, // pakai userId dari parameter
+        where: { user_id: BigInt(userId) },
+        // Ambil semua data yang relevan untuk pengecekan!
         select: {
             id: true,
+            user_id: true,
             full_name: true,
             addres: true,
             phone: true,
+            is_active: true,     // <-- PENTING
+            start_date: true,    // <-- PENTING
+            end_date: true,      // <-- PENTING
+            point: true          // <-- Ambil point juga sekalian biar efisien
         },
     });
 };
+
 
 // get point member
 export const getMemberPointByUserId = async (userId) => {

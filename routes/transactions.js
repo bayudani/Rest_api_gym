@@ -36,4 +36,6 @@ router.post('/',authMiddleware, createTransactionController);
  *         description: Successfully created transaction
  */
 
+router.patch('/:id/status', updateTransactionStatusController);
+
 export default router;
