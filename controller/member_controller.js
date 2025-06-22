@@ -31,7 +31,7 @@ export const getMemberProfile = async (req, res) => {
             });
         }
         
-        // 4. Cek flag is_active (mungkin dinonaktifkan manual oleh admin)
+        // 4. Cek flag is_active
         if (!profile.is_active) {
             membership_status = 'inactive';
             return res.status(403).json({
@@ -40,7 +40,7 @@ export const getMemberProfile = async (req, res) => {
             });
         }
         
-        //  tambahkan info status ke response biar frontend gampang
+        //   info status ke response biar frontend gampang
         res.json({ ...profile, membership_status });
 
     } catch (error) {

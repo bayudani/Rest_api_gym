@@ -1,4 +1,32 @@
-import { getRewardHistoryByUserId } from "../models/rewards_models.js";
+import { getRewardHistoryByUserId, claimReward } from "../models/rewards_models.js";
+
+/**
+ * Controller untuk member mengklaim sebuah reward.
+ */
+export const claimMemberReward = async (req, res) => {
+    const { id: itemRewardId } = req.params; // Ambil ID item dari URL
+    const { id: userId } = req.user; // Ambil ID user dari token (authMiddleware)
+
+    try {
+        const newClaim = await claimReward(userId, itemRewardId);
+        res.status(201).json({ // 201 Created
+            message: "Hore! Reward berhasil diklaim.",
+            data: newClaim,
+        });
+    } catch (error) {
+        console.error("Error di claimMemberReward:", error.message);
+
+        // Kirim response error yang lebih deskriptif ke frontend
+        if (error.message.includes("Poin Anda tidak cukup")) {
+            return res.status(400).json({ error: error.message }); // 400 Bad Request
+        }
+        if (error.message.includes("ditemukan")) {
+            return res.status(404).json({ error: error.message }); // 404 Not Found
+        }
+
+        res.status(500).json({ error: "Servernya lagi error, gagal klaim reward." });
+    }
+};
 
 /**
  * Controller untuk mengambil histori reward member yang sedang login.

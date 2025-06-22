@@ -13,6 +13,7 @@ import transactions from "./routes/transactions.js";
 import member from "./routes/member.js";
 import program from "./routes/programs.js";
 import rewards from "./routes/reward.js";
+import itemRewards from "./routes/itemRewards.js"
 
 
 
@@ -65,7 +66,8 @@ app.use("/api/memberships", membership);
 app.use("/api/transactions", transactions);
 app.use("/api/member", member);
 app.use("/api/programs", program);
-app.use("/api/rewards", rewards);
+app.use("/api/member/rewards", rewards);
+app.use("/api/item-rewards", itemRewards);
 // app.use("/api/categories", categories);
 
 

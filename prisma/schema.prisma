@@ -50,8 +50,8 @@ model fblog_category_fblog_post {
 
 model fblog_comments {
   id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  user_id     BigInt    @db.UnsignedBigInt @unique
-  post_id     BigInt    @db.UnsignedBigInt @unique
+  user_id     BigInt    @db.UnsignedBigInt
+  post_id     BigInt    @db.UnsignedBigInt
   comment     String    @db.Text
   approved    Boolean   @default(false)
   approved_at DateTime? @db.DateTime(0)
@@ -273,9 +273,6 @@ model users {
   created_at         DateTime? @db.Timestamp(0)
   updated_at         DateTime? @db.Timestamp(0)
   profile_photo_path String?   @db.VarChar(255)
-
-   // 🔥 Tambahin ini kalau 1 user punya 1 profile
-  member_profile   member_profiles?
 }
 
 model memberships {
@@ -310,12 +307,10 @@ model member_profiles {
   updated_at DateTime? @db.Timestamp(0)
   point      Int       @default(0)
 
+
   @@index([user_id], map: "member_profiles_user_id_foreign")
+  rewardss   rewardss[]  // ini penting buat bisa di-`include`
 
- rewards    rewards[]
-
-   // 🔥 Tambahin ini:
-  user users @relation(fields: [user_id], references: [id])
 }
 
 model transactions {
@@ -323,7 +318,7 @@ model transactions {
   userId                BigInt              @db.UnsignedBigInt
   membership_package_id BigInt              @db.UnsignedBigInt
   amount                Int
-  proof_image           String              @db.VarChar(255)
+  proof_image           String?             @db.VarChar(255)
   status                transactions_status @default(pending)
   created_at            DateTime?           @db.Timestamp(0)
   updated_at            DateTime?           @db.Timestamp(0)
@@ -332,27 +327,37 @@ model transactions {
   @@index([userId], map: "transactions_userid_foreign")
 }
 
-model programs {
-  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  name        String    @db.VarChar(255)
-  slug        String    @db.VarChar(255)
-  description String?   @db.VarChar(255)
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
+model daily_players {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
 }
 
-model rewards {
-  id                BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
-  member_profile_id BigInt                @db.UnsignedBigInt
-  reward_type       String                @default("Suplemen") @db.VarChar(255)
-  reward_status     rewards_reward_status @default(pending)
-  created_at        DateTime?             @db.Timestamp(0)
-  updated_at        DateTime?             @db.Timestamp(0)
+model item_rewards {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String    @db.VarChar(100)
+  points     Int       @default(0)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
 
-  member_profile    member_profiles @relation(fields: [member_profile_id], references: [id])
+  // Relasi: Satu item reward bisa diklaim berkali-kali oleh member berbeda
+}
 
+model rewardss {
+  id                BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  member_profile_id BigInt                 @db.UnsignedBigInt @unique
+  item_reward_id    BigInt                 @db.UnsignedBigInt
+  reward_status     rewardss_reward_status @default(pending)
+  created_at        DateTime?              @db.Timestamp(0)
+  updated_at        DateTime?              @db.Timestamp(0)
 
-  @@index([member_profile_id], map: "rewards_member_profile_id_foreign")
+  @@index([item_reward_id], map: "rewardss_item_reward_id_foreign")
+  @@index([member_profile_id], map: "rewardss_member_profile_id_foreign")
+
+   // FIX: Definisikan relasi secara eksplisit (Ini yang hilang)
+
+   member_profile member_profiles @relation(fields: [member_profile_id], references: [id])
+
 }
 
 enum fblog_posts_status {
@@ -366,7 +371,7 @@ enum transactions_status {
   Confirmed
 }
 
-enum rewards_reward_status {
+enum rewardss_reward_status {
   pending
   claimed
 }
