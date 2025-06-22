@@ -5,6 +5,7 @@ const router = express.Router();
 // Route untuk mengambil semua item rewards
 router.get('/', getAllItemRewardss);
 //  swagger documentation
+
 /**
  * @swagger
  * /api/item-rewards:
@@ -54,4 +55,6 @@ router.get('/:id', getItemRewardByIdd);
  *                 data:
  *                   type: object
  */
+
+
 export default router;

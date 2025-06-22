@@ -6,11 +6,11 @@ import {
     updateTransactionStatusController,
 } from '../controller/transaction_controller.js';
 import authMiddleware from '../middleware/auth_middleware.js';
-
+import {uploadProof} from '../middleware/upload.js';
 const router = express.Router();
 
 // Create a new transaction
-router.post('/',authMiddleware, createTransactionController);
+router.post('/',authMiddleware, uploadProof.single('proof_image'),createTransactionController);
 // swagger documentation for create transaction
 /**
  * @swagger
