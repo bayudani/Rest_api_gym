@@ -24,7 +24,7 @@ export const handleChat = asyncHandler(async (req, res) => {
     }
 
     // 3. Siapkan dan kirim request ke Google Gemini API
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
 
     const requestBody = {
         contents: [
