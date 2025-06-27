@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import {
     findUserByEmail,
     createUser,
@@ -10,6 +11,36 @@ import prisma from "../prisma/db.js";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // register user
+const sendVerificationEmail = async (email, code) => {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: `"FitID 🏋️" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Kode Verifikasi Akun Kamu 💡",
+        html: `
+    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+      <div style="max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px;">
+        <h2 style="color: #333;">👋 Halo bro,</h2>
+        <p style="font-size: 16px;">Berikut adalah kode verifikasi untuk aktivasi akunmu:</p>
+        <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">${code}</p>
+        <p style="font-size: 14px; color: #999;">Kode ini hanya berlaku selama 10 menit. Jangan kasih ke siapapun ya!</p>
+        <hr style="margin: 20px 0;">
+        <p style="font-size: 12px; color: #aaa;">FitID Gym App • ${new Date().getFullYear()}</p>
+      </div>
+    </div>
+  `
+    });
+
+};
+
+// ✅ REGISTER USER dengan OTP
 export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -22,23 +53,57 @@ export const registerUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await createUser({ name, email, password: hashedPassword });
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit kode
 
-        const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-            expiresIn: "7d",
+        const user = await prisma.users.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                verification_code: verificationCode,
+                is_verified: false,
+            },
         });
+
+        await sendVerificationEmail(email, verificationCode);
 
         res.status(201).json({
-            message: "Registrasi berhasil",
-            user: {
-                id: user.id.toString(),
-                name: user.name,
-                email: user.email,
-                created_at: user.created_at,
-                updated_at: user.updated_at,
-            },
-            token,
+            message: "Registrasi berhasil! Cek email kamu untuk verifikasi.",
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// verify user
+export const verifyEmailCode = async (req, res) => {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+        return res.status(400).json({ error: "Email dan kode wajib diisi!" });
+    }
+
+    try {
+        const user = await prisma.users.findUnique({
+            where: { email },
+        });
+
+        if (!user) return res.status(404).json({ error: "User tidak ditemukan!" });
+        if (user.is_verified) return res.status(400).json({ error: "Akun sudah diverifikasi!" });
+        
+        if (user.verification_code !== code) {
+            return res.status(401).json({ error: "Kode verifikasi salah!" });
+        }
+
+        await prisma.users.update({
+            where: { email },
+            data: {
+                is_verified: true,
+                verification_code: null,
+            },
+        });
+
+        res.status(200).json({ message: "Verifikasi berhasil! Akun kamu aktif." });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -55,6 +120,10 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(401).json({ error: "Email belum terdaftar!" });
         }
+        if (!user.is_verified) {
+            return res.status(403).json({ error: "Akun belum diverifikasi! Cek email kamu." });
+        }
+
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
@@ -141,7 +210,7 @@ export const updateUserInfo = async (req, res) => {
 
 // update pas
 export const updateUserPassword = async (req, res) => {
-        console.log("USER PAYLOAD:", req.user); // <-- Tambahin di sini bro!
+    console.log("USER PAYLOAD:", req.user); // <-- Tambahin di sini bro!
 
     const { currentPassword, newPassword, confirmPassword } = req.body;
 

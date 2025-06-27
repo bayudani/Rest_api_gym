@@ -50,7 +50,7 @@ export const postComment = async (req, res) => {
             user_id: BigInt(userId),
             post_id: BigInt(post_id),
             comment,
-            approved: false,
+            approved: true,
             created_at: new Date(),
             updated_at: new Date(),
         });
@@ -123,12 +123,12 @@ export const postCommentBySlug = async (req, res) => {
             user_id: BigInt(userId),
             post_id: BigInt(post.id),
             comment,
-            approved: false,
+            approved: true,
             created_at: new Date(),
             updated_at: new Date(),
         });
 
-        res.status(201).json({ message: 'Komentar berhasil dikirim! Menunggu persetujuan.', comment: newComment });
+        res.status(201).json({ message: 'Komentar berhasil dikirim!', comment: newComment });
     } catch (error) {
         res.status(500).json({ message: 'Gagal mengirim komentar.', error: error.message });
     }

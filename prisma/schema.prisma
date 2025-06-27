@@ -83,7 +83,7 @@ model fblog_post_fblog_tag {
 model fblog_posts {
   id               BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
   title            String             @db.VarChar(255)
-  slug             String             @db.VarChar(255) @unique
+  slug             String             @db.VarChar(255)  @unique
   sub_title        String?            @db.VarChar(255)
   body             String             @db.LongText
   status           fblog_posts_status @default(pending)
@@ -273,6 +273,8 @@ model users {
   created_at         DateTime? @db.Timestamp(0)
   updated_at         DateTime? @db.Timestamp(0)
   profile_photo_path String?   @db.VarChar(255)
+  is_verified       Boolean   @default(false)
+  verification_code String?   // nullable
 }
 
 model memberships {

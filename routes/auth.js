@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, login,profile,updateUserInfo, updateUserPassword } from '../controller/auth_controller.js';
+import { registerUser, login,profile,updateUserInfo, updateUserPassword,verifyEmailCode } from '../controller/auth_controller.js';
 import authMiddleware from "../middleware/auth_middleware.js";
 
 
@@ -82,6 +82,8 @@ router.post('/login', login);
  *       401:
  *         description: Email/password salah
  */
+
+router.post('/verify', verifyEmailCode);
 
 router.get('/profile', profile);
 
