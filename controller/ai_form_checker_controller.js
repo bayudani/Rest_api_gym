@@ -41,7 +41,7 @@ export const checkExerciseForm = asyncHandler(async (req, res) => {
                 parts: [
                     // Prompt teks sebagai instruksi pertama
                     {
-                        text: `Kamu adalah "Coach Pro", seorang pelatih fitness bersertifikat internasional dengan spesialisasi analisis postur. Analisis gambar berikut dengan saksama. User sedang melakukan gerakan "${exerciseName}".
+                        text: `Kamu adalah "Coach FitID", seorang pelatih fitness bersertifikat internasional dengan spesialisasi analisis postur. Analisis gambar berikut dengan saksama. User sedang melakukan gerakan "${exerciseName}".
                         
                         Berikan feedback dengan struktur JSON berikut:
                         {
