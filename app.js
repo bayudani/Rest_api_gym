@@ -15,6 +15,7 @@ import program from "./routes/programs.js";
 import rewards from "./routes/reward.js";
 import itemRewards from "./routes/itemRewards.js";
 import ai from "./routes/ai.js";
+import formChacker from "./routes/ai_form_checker_routes.js";
 
 
 
@@ -70,6 +71,7 @@ app.use("/api/programs", program);
 app.use("/api/member/rewards", rewards);
 app.use("/api/item-rewards", itemRewards);
 app.use("/api/ai", ai);
+app.use("/api/ai", formChacker);
 // app.use("/api/categories", categories);
 
 
