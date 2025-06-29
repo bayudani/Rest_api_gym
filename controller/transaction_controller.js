@@ -129,7 +129,7 @@ export const findTransactionByIdController = async (req, res) => {
  * Sekaligus mengirim notifikasi email ke user.
  */
 export const updateTransactionStatusController = async (req, res) => {
- try {
+  try {
     const transactionId = req.params.id;
     const { status, reason } = req.body; 
 
