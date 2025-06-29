@@ -6,66 +6,93 @@ import {
 } from "../models/transactions_models.js"; // asumsinya yang di atas tadi di file ini
 import { createMemberProfile } from "../models/member_models.js";
 import { getMembershipById } from "../models/membership_models.js";
+import { sendTransactionPendingEmail, sendTransactionConfirmedEmail, sendTransactionRejectedEmail, } from "../helpers/mailer.js"; // <-- Impor dari file helper
+import { findUserById } from "../models/user_models.js"; // <-- FIX: Pastikan baris ini ada dan tidak di-comment
 
 // Create new transaction
 export const createTransactionController = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; // Ambil userId dari middleware otentikasi (misal: JWT)
 
-    // Data dari body sekarang tidak ada proof_image
-    const {
-      membership_package_id,
-      amount,
-      full_name,
-      addres, // typo di kode asli, harusnya address
-      phone,
-    } = req.body;
-    const numericAmount = parseInt(amount, 10); // Ubah string "15000" menjadi angka 15000
-    // File yang diupload ada di req.file
+    // --- VALIDASI PENTING YANG DIPERBAIKI ---
+    // Sebelum lanjut, pastikan user dengan ID dari token ini benar-benar ada di DB
+    const user = await findUserById(userId);
+    if (!user) {
+      // Jika user tidak ditemukan, jangan lanjut. Kasih error yang jelas.
+      return res.status(404).json({ message: "User tidak ditemukan. Mungkin token tidak valid atau user telah dihapus." });
+    }
+    // --- SELESAI PERBAIKAN VALIDASI ---
+
+    const { membership_package_id, amount, full_name, addres, phone } = req.body;
+    const numericAmount = parseInt(amount, 10);
     const proofFile = req.file;
+
     if (!proofFile) {
-      return res
-        .status(400)
-        .json({ message: "Bukti transfer (gambar) wajib diupload." });
+      return res.status(400).json({ message: "Bukti transfer (gambar) wajib diupload." });
     }
 
-    // Validasi field lainnya
     if (!membership_package_id || !amount || !full_name || !addres || !phone) {
       return res.status(400).json({ message: "Semua field teks wajib diisi." });
     }
 
-    // --- INI PERUBAHANNYA ---
-    // Simpan path relatif yang bisa dikenali Laravel
-    // Contoh hasilnya: "proofs/proof_image-1678886400000-12345.jpg"
     const proofImagePath = `bukti-transfer/${proofFile.filename}`;
 
-    // ... (kode createMemberProfile tetap sama) ...
+    // Buat/update profil member (diset tidak aktif dulu)
     await createMemberProfile({
       user_id: userId,
       full_name,
-      addres,
+      addres, // Sebaiknya diganti jadi 'address' di seluruh project biar konsisten
       phone,
-      is_active: false, // Default tetap false, karena belum dikonfirmasi
+      is_active: false,
     });
 
-    // Simpan transaksi dengan path gambar yang baru
+    // Buat record transaksi di database
     const transaction = await createTransaction({
       userId,
       membership_package_id,
       amount: numericAmount,
-      proof_image: proofImagePath, // <-- Simpan path relatif ke DB
+      proof_image: proofImagePath,
       status: "pending",
     });
 
+    // --- BAGIAN KIRIM EMAIL NOTIFIKASI (SUDAH DIOPTIMASI) ---
+    try {
+
+      const membership = await getMembershipById(membership_package_id);
+
+      if (membership) {
+        // Panggil fungsi pengirim email dari helper
+        await sendTransactionPendingEmail({
+          userEmail: user.email,
+          userName: user.name, // Menggunakan nama dari user yang sudah divalidasi
+          transactionId: transaction.id,
+          packageName: membership.name,
+          amount: transaction.amount,
+        });
+      } else {
+        console.warn("Membership tidak ditemukan, email notifikasi tidak terkirim.");
+      }
+    } catch (emailError) {
+      // Jika kirim email gagal, transaksi utama JANGAN digagalkan.
+      // Cukup catat errornya di log server.
+      console.error("KRUSIAL: Gagal mengirim email notifikasi transaksi:", emailError);
+    }
+    // --- SELESAI BAGIAN EMAIL ---
+
     res.status(201).json({
-      message: "Transaksi berhasil dibuat dan sedang menunggu konfirmasi.",
+      message: "Transaksi berhasil dibuat! Cek email kamu untuk info selanjutnya.",
       data: transaction,
     });
   } catch (error) {
+    // Log error asli dari Prisma atau service lain untuk debugging
     console.error("Error di createTransactionController:", error);
-    res
-      .status(500)
-      .json({ message: error.message || "Terjadi kesalahan pada server" });
+
+    // Memberikan response yang lebih bersahabat ke client
+    const errorMessage = error.code === 'P2003'
+      ? "Terjadi masalah relasi data. Pastikan semua data terkait valid."
+      : error.message || "Terjadi kesalahan pada server";
+
+    res.status(500).json({ message: errorMessage });
   }
 };
 
@@ -97,45 +124,46 @@ export const findTransactionByIdController = async (req, res) => {
 };
 
 // Update transaction status
+/**
+ * Controller untuk mengupdate status transaksi (oleh Admin).
+ * Sekaligus mengirim notifikasi email ke user.
+ */
 export const updateTransactionStatusController = async (req, res) => {
-  try {
+ try {
     const transactionId = req.params.id;
-    const { status } = req.body; // status dari admin: 'Confirmed' atau 'Rejected'
+    const { status, reason } = req.body; 
 
-    if (!status) {
-      return res.status(400).json({ message: "Status wajib diisi." });
+    if (!status || !['Confirmed', 'Rejected'].includes(status)) {
+      return res.status(400).json({ message: "Status wajib diisi dan harus 'Confirmed' atau 'Rejected'." });
     }
 
-    // 1. Update status transaksi di database
-    const updatedTransaction = await updateTransactionStatus(
-      transactionId,
-      status
-    );
+    // 1. Update status transaksi
+    const updatedTransaction = await updateTransactionStatus(transactionId, status);
     if (!updatedTransaction) {
-      return res
-        .status(404)
-        .json({ message: "Transaksi tidak ditemukan untuk diupdate." });
+      return res.status(404).json({ message: "Transaksi tidak ditemukan untuk diupdate." });
     }
 
-    // 2. Jika statusnya 'Confirmed', baru kita aktifkan member
+    // !! BAGIAN PENTING !!
+    // Pastikan user diambil dari DB SEBELUM blok if/else.
+    // Ini adalah sumber variabel `user` untuk email.
+    const user = await findUserById(updatedTransaction.userId);
+    if (!user) {
+        console.error(`User dengan ID ${updatedTransaction.userId} tidak ditemukan saat update status transaksi.`);
+        // Kirim response di sini agar tidak lanjut ke bawah jika user tidak ada
+        return res.status(404).json({ message: "User terkait transaksi ini tidak ditemukan." });
+    }
+
+    // 3. Logic berdasarkan status
     if (status === "Confirmed") {
-      // Ambil detail membership untuk tahu durasinya
-      const membership = await getMembershipById(
-        updatedTransaction.membership_package_id
-      );
+      const membership = await getMembershipById(updatedTransaction.membership_package_id);
       if (!membership) {
-        return res
-          .status(404)
-          .json({ message: "Paket membership terkait tidak ditemukan." });
+        return res.status(404).json({ message: "Paket membership terkait tidak ditemukan." });
       }
 
-      // 3. Hitung tanggal mulai dan berakhir membership
       const startDate = new Date();
-      const endDate = new Date(startDate); // Copy tanggal start
-      endDate.setDate(1 + membership.duration_months);
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + membership.duration_months);
 
-      // 4. Update profil member menjadi AKTIF!
-      // Kita "reuse" fungsi createMemberProfile karena dia sudah handle logic update.
       const activatedProfile = await createMemberProfile({
         user_id: updatedTransaction.userId,
         start_date: startDate,
@@ -143,21 +171,41 @@ export const updateTransactionStatusController = async (req, res) => {
         is_active: true,
       });
 
-      return res.status(200).json({
-        message:
-          "Transaksi berhasil dikonfirmasi dan membership telah diaktifkan.",
-        data: {
-          transaction: updatedTransaction,
-          profile: activatedProfile,
-        },
-      });
-    }
+      // Kirim email konfirmasi ke user menggunakan variabel `user` dari atas
+      try {
+        await sendTransactionConfirmedEmail({
+          userEmail: user.email,
+          userName: user.name,
+          endDate: activatedProfile.end_date,
+        });
+      } catch (emailError) {
+        // Log error ini jika pengiriman email gagal
+        console.error("KRUSIAL: Gagal mengirim email konfirmasi transaksi:", emailError);
+      }
 
-    // Kalau statusnya bukan 'Confirmed' (misal 'Rejected'), cukup kembalikan pesan biasa
-    res.status(200).json({
-      message: `Status transaksi berhasil diupdate menjadi '${status}'.`,
-      data: updatedTransaction,
-    });
+      return res.status(200).json({
+        message: "Transaksi berhasil dikonfirmasi dan membership telah diaktifkan.",
+        data: { transaction: updatedTransaction, profile: activatedProfile },
+      });
+
+    } else { // Ini berarti statusnya 'Rejected'
+        // Kirim email penolakan ke user menggunakan variabel `user` dari atas
+        try {
+            await sendTransactionRejectedEmail({
+                userEmail: user.email,
+                userName: user.name,
+                transactionId: transactionId,
+                reason: reason
+            });
+        } catch(emailError) {
+            console.error("Gagal kirim email penolakan transaksi:", emailError);
+        }
+
+        return res.status(200).json({
+            message: `Status transaksi berhasil diupdate menjadi '${status}'.`,
+            data: updatedTransaction,
+        });
+    }
   } catch (error) {
     console.error("Error di updateTransactionStatusController:", error);
     res.status(500).json({ message: "Gagal mengupdate status transaksi." });
