@@ -68,12 +68,12 @@ const sendTransactionPendingEmail = async ({
         html: `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; background-color: #f9f9f9;">
         <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-            <h2 style="color: #333;">Wih, transaksi anda lagi diproses nih, ${userName}! 🔥</h2>
+            <h2 style="color: #333;">Transaksi anda sedang diproses, ${userName}! 🔥</h2>
             <p style="font-size: 16px;">
-                Terimakasih telah melakukan pembayaran. Tim admin kami lagi ngecek bukti transfer anda.
+                Terimakasih telah melakukan pembayaran. Kami sudah menerima bukti pembayaran anda dan sedang memproses transaksi ini.
             </p>
             <p style="font-size: 16px;">
-                Mohon ditunggu ya, nanti bakal ada email konfirmasi lagi kalau membership anda udah aktif.
+                Mohon ditunggu, nanti bakal ada email konfirmasi lagi kalau membership anda udah aktif.
             </p>
             
             <div style="border-left: 4px solid #ffc107; padding-left: 15px; margin: 25px 0; background-color: #fff9e6; padding-top: 10px; padding-bottom: 10px; border-radius: 0 5px 5px 0;">
