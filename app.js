@@ -85,3 +85,5 @@ app.listen(PORT, () => {
   console.log(`Server jalan di http://localhost:${PORT}`);
     console.log('Swagger UI -> http://localhost:3001/api-docs');
 });
+
+export default app;
