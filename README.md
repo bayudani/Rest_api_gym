@@ -72,7 +72,7 @@ REST API backend profesional untuk aplikasi Gym, dikembangkan menggunakan **Expr
 
 > **Info lengkap endpoint dan skema request/response cek dokumentasi Swagger:**
 >
-> [Swagger UI - Dokumentasi API](http://localhost:3001/api-docs) *(atau url server Anda)*
+> [Swagger UI - Dokumentasi API](http://localhost:3001/api-docs) 
 
 ---
 
@@ -96,10 +96,12 @@ npm install
 Buat file `.env` di root, isi seperti contoh berikut:
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/namadb
+DATABASE_URL=mysql://user:password@localhost:5432/namadb
 JWT_SECRET=your_jwt_secret
 PORT=3001
 GEMINI_API_KEY=your_gemini_api_key
+EMAIL_USER=youremail@gmail.com
+EMAIL_PASS=yourAppPassword
 ```
 
 **4. Setup Prisma (Database Migration)**
@@ -133,12 +135,7 @@ Swagger UI: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 - **Proxy:** http-proxy-middleware (Integrasi Laravel)
 - **Logger:** Morgan, custom logger
 
----
 
-## 🤝 Kontribusi
-
-Pull request & issue sangat diterima!  
-Pastikan cek [CONTRIBUTING.md](CONTRIBUTING.md) jika tersedia.
 
 ---
 
