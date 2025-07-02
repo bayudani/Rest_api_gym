@@ -19,6 +19,7 @@
     "dotenv": "^16.5.0",
     "express": "~4.16.1",
     "express-async-handler": "^1.2.0",
+    "form-data": "^4.0.3",
     "http-errors": "~1.6.3",
     "http-proxy-middleware": "^3.0.5",
     "jade": "~1.11.0",

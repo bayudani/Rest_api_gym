@@ -1,53 +1,81 @@
 import multer from "multer";
 import path from "path";
-// import fs form "fs";
 import dotenv from "dotenv";
-import asyncHandler from 'express-async-handler'; // <-- FIX #2: Tambahkan import 'express-async-handler'
+import asyncHandler from 'express-async-handler'; // Untuk error handling async pada middleware
 
+// -------------------------------------------------------------------------
+// Dokumentasi File: upload.js
+// -------------------------------------------------------------------------
+// File ini berisi konfigurasi middleware upload file menggunakan multer,
+// baik untuk penyimpanan ke disk (misal: upload bukti transfer ke folder Laravel)
+// maupun upload file ke memori (misal: upload gambar untuk analisis AI).
+// Semua variabel environment diatur menggunakan dotenv.
+//
+// Konsep utama:
+// - Penyimpanan file ke disk (diskStorage) untuk bukti transfer
+// - Penyimpanan file di memori (memoryStorage) untuk keperluan AI (Gemini Vision)
+// - Validasi file yang diupload (misal: hanya gambar, batas ukuran, dsb)
+// - Menggunakan asyncHandler agar middleware multer bisa menangani error secara proper
+// -------------------------------------------------------------------------
 
-dotenv.config(); // Panggil ini untuk memuat variabel dari .env
+dotenv.config(); // Memuat variabel dari .env
 
-// --- INI DIA PERUBAHANNYA ---
-// Ambil path absolut dari environment variable
+// -------------------------------------------------------------------------
+// Konfigurasi Storage Disk untuk Bukti Transfer
+// -------------------------------------------------------------------------
+
+// Ambil path absolut dari variabel environment (.env)
+// Contoh .env: LARAVEL_STORAGE_PATH=/absolute/path/to/laravel/storage/app/public
 const laravelStoragePath = process.env.LARAVEL_STORAGE_PATH;
 
-// Tambahkan pengecekan untuk memastikan variabel .env ada
+// Validasi: Pastikan variabel .env sudah di-set
 if (!laravelStoragePath) {
     throw new Error("FATAL ERROR: LARAVEL_STORAGE_PATH tidak disetel di file .env");
 }
 
-// Fungsi untuk memastikan direktori ada, jika tidak, maka dibuat
-// (Fungsi ini tetap sama)
+// -------------------------------------------------------------------------
+// (Opsional) Fungsi helper untuk pastikan direktori tujuan upload sudah ada.
+// Biasanya pakai fs.mkdirSync, bisa diaktifkan jika dibutuhkan.
+// -------------------------------------------------------------------------
+/*
 const ensureDirectoryExistence = (filePath) => {
-    // ... (tidak ada perubahan di fungsi ini)
+    const dirname = path.dirname(filePath);
+    if (fs.existsSync(dirname)) {
+        return true;
+    }
+    ensureDirectoryExistence(dirname);
+    fs.mkdirSync(dirname);
 };
+*/
 
-// Konfigurasi penyimpanan untuk bukti transaksi
+// -------------------------------------------------------------------------
+// Konfigurasi multer.diskStorage untuk upload bukti transfer (DISK STORAGE)
+// -------------------------------------------------------------------------
 const proofStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // --- Path destinasinya sekarang menggunakan variabel dari .env ---
+        // Lokasi folder tujuan, disesuaikan dari .env
         const dest = path.join(laravelStoragePath, 'bukti-transfer');
-        ensureDirectoryExistence(dest + '/');
+        // ensureDirectoryExistence(dest + '/'); // Aktifkan jika ingin pastikan folder selalu ada
         cb(null, dest);
     },
     filename: (req, file, cb) => {
-        // ... (tidak ada perubahan di sini)
+        // Penamaan file: [nama field]-[timestamp]-[random].[ext]
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-// Middleware multer (tetap sama)
+// Middleware untuk upload bukti transfer ke disk
 export const uploadProof = multer({ storage: proofStorage });
 
-// ===================================================================
-// >> BAGIAN 2: UNTUK MENGOLAH FILE DI MEMORI (AI Form Checker)
-// ===================================================================
+// ==========================================================================
+// Konfigurasi Upload ke Memori (untuk Analisis AI, misal: Gemini Vision)
+// ==========================================================================
 
-// Konfigurasi untuk menyimpan file di memori sementara
+// Gunakan memoryStorage, file TIDAK ditulis ke disk, hanya di RAM sementara
 const memoryStorage = multer.memoryStorage();
 
-// Filter untuk memastikan hanya file gambar yang diterima
+// Filter: Hanya izinkan file gambar (image/*)
 const imageFileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -56,27 +84,36 @@ const imageFileFilter = (req, file, cb) => {
     }
 };
 
-// Instance multer yang menggunakan memory storage
+// Instance multer untuk upload ke memory dengan filter & limit ukuran
 const memoryUpload = multer({
     storage: memoryStorage,
     fileFilter: imageFileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // Batas ukuran file 5 MB
+    limits: { fileSize: 5 * 1024 * 1024 } // Maks 5MB
 });
 
-// Middleware untuk upload gambar latihan (YANG INI UNTUK AI)
-// Kita bungkus dengan asyncHandler untuk error handling yang lebih baik
+// Middleware upload gambar latihan untuk AI (misal: field 'exerciseImage')
+// Menggunakan asyncHandler agar error dari multer bisa ditangani Express
 export const uploadExerciseImage = asyncHandler(async (req, res, next) => {
-    // Jalankan multer untuk satu file dengan nama field 'exerciseImage'
+    // Proses upload single file dengan field name 'exerciseImage'
     memoryUpload.single('exerciseImage')(req, res, (err) => {
         if (err) {
-            // Menangani error dari multer (misal: file terlalu besar, bukan gambar)
+            // Error dari multer (ukuran, filter, dsb)
             return res.status(400).json({ message: err.message });
         }
-        // Jika tidak ada file yang diupload sama sekali
+        // Validasi: file wajib ada
         if (!req.file) {
             return res.status(400).json({ message: 'Gambar latihan wajib diupload.' });
         }
-        // Jika semua aman, lanjut ke controller berikutnya
+        // Lanjut ke controller berikutnya kalau sukses
         next();
     });
 });
+
+// -------------------------------------------------------------------------
+// Ringkasan Penggunaan
+// -------------------------------------------------------------------------
+// - uploadProof: Untuk bukti transfer, file disimpan ke disk di Laravel.
+//   Contoh pemakaian: router.post('/upload-proof', uploadProof.single('proof'), ...)
+// - uploadExerciseImage: Untuk gambar form checker AI, file hanya di memori.
+//   Contoh pemakaian: router.post('/ai/check-form', uploadExerciseImage, ...)
+// -------------------------------------------------------------------------

@@ -49,6 +49,7 @@ app.use('/laravel', createProxyMiddleware({
 //   origin: 'http://localhost:5173', // asal domain yang diizinkan
 //   credentials: true, // kalau pakai cookie
 // }));
+
 // bigint fix global
 BigInt.prototype.toJSON = function () {
   return this.toString();
@@ -77,7 +78,7 @@ app.use("/api/ai", formChacker);
 
 // Tes endpoint root
 app.get("/", (req, res) => {
-  res.send("Welcome to the API gm");
+  res.send("Welcome to the API gym");
 });
 
 const PORT = process.env.PORT || 3001;
