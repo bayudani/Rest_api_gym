@@ -140,6 +140,38 @@ Swagger UI: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 
 ---
 
+
+
+## 🔥 Quick Test dengan Postman
+
+- Import koleksi Postman: [Download Postman Collection](https://github.com/bayudani/Rest_api_gym/blob/main/docs/fitid_gym_api.postman_collection.json)
+- Atau gunakan Swagger UI di `/api-docs` untuk eksplorasi langsung.
+
+---
+
+## 🤝 Contributing
+
+Kontribusi sangat welcome!
+Silakan baca [CONTRIBUTING.md](CONTRIBUTING.md) untuk panduan kontribusi, atau open issue/PR jika ada saran atau bug.
+
+---
+
+## ❓ FAQ
+
+**Q: Error saat migrate database?**
+A: Pastikan koneksi `DATABASE_URL` di `.env` sudah benar, dan user DB punya hak akses penuh.
+
+**Q: Email OTP tidak terkirim?**
+A: Cek setingan `EMAIL_USER` dan `EMAIL_PASS` di `.env`. Gunakan App Password jika pakai Gmail.
+
+**Q: Bagaimana cara ganti port?**
+A: Ubah variabel `PORT` di file `.env`.
+
+
+---
+
+
+
 ## 📄 Lisensi
 
 MIT License. Lihat file [LICENSE](LICENSE) untuk detail.
@@ -148,5 +180,5 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detail.
 
 ## 👨‍💻 Author
 
-Bayu Dani - [LinkedIn](https://www.linkedin.com/in/bayu-dani-kurniawan?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
+Bayu Dani Kurniawan - [LinkedIn](https://www.linkedin.com/in/bayu-dani-kurniawan?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
 © 2025
