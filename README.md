@@ -2,7 +2,8 @@
 
 REST API backend profesional untuk aplikasi Gym, dikembangkan menggunakan **Express.js** dan **Prisma ORM**. Proyek ini menyediakan berbagai layanan untuk aplikasi fitness modern, mulai dari autentikasi user, membership, artikel, sistem like, komentar, AI form checker, hingga sistem rewards. Dirancang scalable, secure, dan mudah diintegrasikan dengan frontend/mobile.
 
-![CI](https://github.com/bayudani/Rest_api_gym/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/bayudani/Rest_api_gym/actions/workflows/ci.yml/badge.svg) ![Last Commit](https://img.shields.io/github/last-commit/bayudani/Rest_api_gym?color=blue) ![Language](https://img.shields.io/github/languages/top/bayudani/Rest_api_gym)  ![npm](https://img.shields.io/badge/npm->=_6.0.0-blue)
+![Prisma](https://img.shields.io/badge/ORM-Prisma-3982CE?logo=prisma) ![Express](https://img.shields.io/badge/Backend-Express.js-green?logo=express) ![Nodemailer](https://img.shields.io/badge/Email-Nodemailer-yellowgreen)
 
 ---
 
