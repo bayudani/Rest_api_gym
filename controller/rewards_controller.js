@@ -1,5 +1,7 @@
 import { getRewardHistoryByUserId, claimReward } from "../models/rewards_models.js";
-
+import { sendRewardClaimedEmail } from "../helpers/mailer.js";
+import { getItemRewardById } from "../models/itemRewards_models.js";
+import { findUserById } from "../models/user_models.js";
 /**
  * Controller untuk member mengklaim sebuah reward.
  */
@@ -7,12 +9,29 @@ export const claimMemberReward = async (req, res) => {
     const { id: itemRewardId } = req.params; // Ambil ID item dari URL
     const { id: userId } = req.user; // Ambil ID user dari token (authMiddleware)
 
+    const user = await findUserById(userId);
     try {
         const newClaim = await claimReward(userId, itemRewardId);
         res.status(201).json({ // 201 Created
             message: "Hore! Reward berhasil diklaim.",
             data: newClaim,
         });
+        // notif
+        try {
+            const reward = await getItemRewardById(itemRewardId);
+            if(reward){
+                // panggil fungsi kirim email dari helpers
+                await sendRewardClaimedEmail({
+                    userEmail : user.email,
+                    userName:user.name,
+                    rewardName:reward.name,
+                })
+            }else{
+                console.warn ("Reward tidak ditemukan, email notifikasi tidak terkirim")
+            }
+        } catch (emailError) {
+            console.error("Gagal mengirim email", emailError);
+        }
     } catch (error) {
         console.error("Error di claimMemberReward:", error.message);
 

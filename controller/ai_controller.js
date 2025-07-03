@@ -47,6 +47,7 @@ export const handleChat = asyncHandler(async (req, res) => {
     // 3 ambil chat history dari Redis
     const history = await redisClient.lRange(redisKey,0, 9); // Ambil 10 pesan terakhir dari chat history
     const chatHitoryForGemini  = history.map(item => JSON.parse(item)); // Parse setiap item dari Redis ke JSON
+    console.log("Chat history for Gemini:", chatHitoryForGemini);
     // 4. Siapkan dan kirim request ke Google Gemini API
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
@@ -97,8 +98,10 @@ export const handleChat = asyncHandler(async (req, res) => {
         await redisClient.rPush(redisKey, JSON.stringify(userMessageToSave));
         await redisClient.rPush(redisKey, JSON.stringify(aiMessageToSave));
 
-         // Set masa berlaku untuk riwayat chat ini, misal 7 hari
-        await redisClient.expire(redisKey, 60 * 60 * 24 * 7);
+        console.log('Chat history saved to Redis:', { userMessageToSave, aiMessageToSave });
+
+         // Set masa berlaku untuk riwayat chat ini, misal 1 hari
+        await redisClient.expire(redisKey, 60 * 60 * 24);
 
         res.status(200).json({ reply: aiReply });
 
@@ -125,11 +128,11 @@ export const getChatHistory = asyncHandler(async (req, res) => {
 
     // Ambil semua data dari list di Redis
     const history = await redisClient.lRange(redisKey, 0, -1);
-    
+    console.log(`Mengambil riwayat chat untuk user ID ${userId} dari Redis:`, history);
     // Ubah kembali dari format string JSON ke object JSON
     const parsedHistory = history.map(item => {
         const parsedItem = JSON.parse(item);
-        // Kita ubah formatnya biar lebih simpel buat di-render di Flutter
+        //  ubah formatnya biar lebih simpel buat di-render di Flutter
         return {
             sender: parsedItem.role === 'user' ? 'user' : 'ai',
             text: parsedItem.parts[0].text

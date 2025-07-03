@@ -159,4 +159,29 @@ const sendTransactionRejectedEmail = async ({ userEmail, userName, transactionId
         `,
     });
 };
-export { sendVerificationEmail, sendTransactionPendingEmail, sendTransactionConfirmedEmail, sendTransactionRejectedEmail };
+
+// notifikasi email klaim reward
+const sendRewardClaimedEmail = async ({ userEmail, userName, rewardName }) => {
+    await transporter.sendMail({
+        from: `"FitID 🏋️" <${process.env.EMAIL_USER}>`,
+        to: userEmail,
+        subject: "Klaim Reward Berhasil! 🎉",
+        html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; background-color: #f9f9f9;">
+            <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                <h2 style="color: #4CAF50; text-align: center;">Selamat, ${userName}! Klaim reward anda berhasil!</h2>
+                <p style="font-size: 16px;">
+                Kami senang menginformasikan bahwa klaim reward anda untuk <strong>${rewardName}</strong> telah berhasil diproses.
+                </p>
+                <p style="font-size: 16px; text-align: center;">
+                Terima kasih telah menjadi bagian dari komunitas FitID! Silahkan ambil reward di FitID dan tunjukkan bukti email ini!
+                </p>
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+                <p style="font-size: 12px; color: #aaa; text-align: center;">FitID Gym App • ${new Date().getFullYear()}</p>
+            </div>
+        </div>
+        `,
+    });
+};
+
+export { sendVerificationEmail, sendTransactionPendingEmail, sendTransactionConfirmedEmail, sendTransactionRejectedEmail, sendRewardClaimedEmail };

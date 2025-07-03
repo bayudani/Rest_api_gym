@@ -14,8 +14,7 @@ export const createTransactionController = async (req, res) => {
   try {
     const userId = req.user.id; // Ambil userId dari middleware otentikasi (misal: JWT)
 
-    // --- VALIDASI PENTING YANG DIPERBAIKI ---
-    // Sebelum lanjut, pastikan user dengan ID dari token ini benar-benar ada di DB
+    //
     const user = await findUserById(userId);
     if (!user) {
       // Jika user tidak ditemukan, jangan lanjut. Kasih error yang jelas.
@@ -91,7 +90,6 @@ export const createTransactionController = async (req, res) => {
     const errorMessage = error.code === 'P2003'
       ? "Terjadi masalah relasi data. Pastikan semua data terkait valid."
       : error.message || "Terjadi kesalahan pada server";
-
     res.status(500).json({ message: errorMessage });
   }
 };
