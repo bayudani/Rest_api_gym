@@ -30,6 +30,7 @@
     "mysql2": "^3.14.1",
     "nodemailer": "^7.0.3",
     "prisma": "^6.9.0",
+    "redis": "^5.5.6",
     "string-strip-html": "^13.4.12",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

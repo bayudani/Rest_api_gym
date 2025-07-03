@@ -45,6 +45,7 @@ REST API backend profesional untuk aplikasi Gym, dikembangkan menggunakan **Expr
 
   - Reverse proxy ke backend Laravel (untuk fitur legacy/ekstra)
   - Email notifikasi membership & OTP
+  - Redis untuk caching
 - **📘 Dokumentasi API**
 
   - Swagger UI tersedia di `/api-docs` (otomatis dari source code)
@@ -105,6 +106,8 @@ PORT=3001
 GEMINI_API_KEY=your_gemini_api_key
 EMAIL_USER=youremail@gmail.com
 EMAIL_PASS=yourAppPassword
+REDIS_URL=REDIS_URL="redis://[user]:[password]@[hostname]:[port]"
+
 ```
 
 **4. Setup Prisma (Database Migration)**
@@ -140,8 +143,6 @@ Swagger UI: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 
 ---
 
-
-
 ## 🔥 Quick Test dengan Postman
 
 - Import koleksi Postman: [Download Postman Collection](https://github.com/bayudani/Rest_api_gym/blob/main/docs/fitid_gym_api.postman_collection.json)
@@ -167,10 +168,7 @@ A: Cek setingan `EMAIL_USER` dan `EMAIL_PASS` di `.env`. Gunakan App Password ji
 **Q: Bagaimana cara ganti port?**
 A: Ubah variabel `PORT` di file `.env`.
 
-
 ---
-
-
 
 ## 📄 Lisensi
 
