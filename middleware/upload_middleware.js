@@ -61,7 +61,7 @@ const uploadProofToMemory = multer({
 
 // Middleware untuk upload bukti transfer dan kirim ke Laravel API
 export const uploadProof = asyncHandler(async (req, res, next) => {
-    uploadProofToMemory.single('proof')(req, res, async (err) => {
+    uploadProofToMemory.single('proof_image')(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: err.message });
         }
