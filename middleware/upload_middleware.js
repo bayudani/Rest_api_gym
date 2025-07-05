@@ -1,78 +1,104 @@
-import multer from "multer";
-import path from "path";
-import dotenv from "dotenv";
-import asyncHandler from 'express-async-handler'; // Untuk error handling async pada middleware
+import multer from 'multer';
+import path from 'path';
+import dotenv from 'dotenv';
+import asyncHandler from 'express-async-handler';
+import axios from 'axios';
+import FormData from 'form-data';
 
 // -------------------------------------------------------------------------
 // Dokumentasi File: upload.js
 // -------------------------------------------------------------------------
 // File ini berisi konfigurasi middleware upload file menggunakan multer,
-// baik untuk penyimpanan ke disk (misal: upload bukti transfer ke folder Laravel)
-// maupun upload file ke memori (misal: upload gambar untuk analisis AI).
+// untuk mengirim file ke server Laravel (via API) dan untuk analisis AI.
 // Semua variabel environment diatur menggunakan dotenv.
 //
 // Konsep utama:
-// - Penyimpanan file ke disk (diskStorage) untuk bukti transfer
-// - Penyimpanan file di memori (memoryStorage) untuk keperluan AI (Gemini Vision)
-// - Validasi file yang diupload (misal: hanya gambar, batas ukuran, dsb)
-// - Menggunakan asyncHandler agar middleware multer bisa menangani error secara proper
+// - Upload file ke server Laravel via API (menggunakan Ngrok URL)
+// - Penyimpanan file di memori (memoryStorage) untuk Vercel (serverless)
+// - Validasi file yang diupload (misal: hanya gambar untuk AI, batas ukuran, dsb)
+// - Menggunakan asyncHandler untuk error handling yang proper
+// - Menggunakan axios dan form-data untuk mengirim file ke Laravel API
 // -------------------------------------------------------------------------
 
 dotenv.config(); // Memuat variabel dari .env
 
 // -------------------------------------------------------------------------
-// Konfigurasi Storage Disk untuk Bukti Transfer
+// Validasi Variabel Environment
 // -------------------------------------------------------------------------
 
-// Ambil path absolut dari variabel environment (.env)
-// Contoh .env: LARAVEL_STORAGE_PATH=/absolute/path/to/laravel/storage/app/public
-const laravelStoragePath = process.env.LARAVEL_STORAGE_PATH;
+// Ambil URL API Laravel dari variabel environment (.env)
+// Contoh .env: LARAVEL_API_URL=https://abc123.ngrok.io/api/upload-proof
+const laravelApiUrl = process.env.LARAVEL_API_URL;
 
 // Validasi: Pastikan variabel .env sudah di-set
-if (!laravelStoragePath) {
-    throw new Error("FATAL ERROR: LARAVEL_STORAGE_PATH tidak disetel di file .env");
+if (!laravelApiUrl) {
+    throw new Error('FATAL ERROR: LARAVEL_API_URL tidak disetel di file .env');
 }
 
 // -------------------------------------------------------------------------
-// (Opsional) Fungsi helper untuk pastikan direktori tujuan upload sudah ada.
-// Biasanya pakai fs.mkdirSync, bisa diaktifkan jika dibutuhkan.
+// Konfigurasi Upload ke Memori untuk Bukti Transfer (Vercel Compatible)
 // -------------------------------------------------------------------------
-/*
-const ensureDirectoryExistence = (filePath) => {
-    const dirname = path.dirname(filePath);
-    if (fs.existsSync(dirname)) {
-        return true;
-    }
-    ensureDirectoryExistence(dirname);
-    fs.mkdirSync(dirname);
-};
-*/
 
-// -------------------------------------------------------------------------
-// Konfigurasi multer.diskStorage untuk upload bukti transfer (DISK STORAGE)
-// -------------------------------------------------------------------------
-const proofStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // Lokasi folder tujuan, disesuaikan dari .env
-        const dest = path.join(laravelStoragePath, 'bukti-transfer');
-        // ensureDirectoryExistence(dest + '/'); // Aktifkan jika ingin pastikan folder selalu ada
-        cb(null, dest);
-    },
-    filename: (req, file, cb) => {
-        // Penamaan file: [nama field]-[timestamp]-[random].[ext]
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+// Gunakan memoryStorage karena Vercel tidak mendukung disk storage
+const proofStorage = multer.memoryStorage();
+
+// Filter: Izinkan hanya file gambar atau PDF untuk bukti transfer
+const proofFileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('File harus berupa gambar (JPEG/PNG) atau PDF!'), false);
     }
+};
+
+// Instance multer untuk upload bukti transfer ke memori
+const uploadProofToMemory = multer({
+    storage: proofStorage,
+    fileFilter: proofFileFilter,
+    limits: { fileSize: 10 * 1024 * 1024 }, // Maks 10MB untuk bukti transfer
 });
 
-// Middleware untuk upload bukti transfer ke disk
-export const uploadProof = multer({ storage: proofStorage });
+// Middleware untuk upload bukti transfer dan kirim ke Laravel API
+export const uploadProof = asyncHandler(async (req, res, next) => {
+    uploadProofToMemory.single('proof_image')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ message: 'Bukti transfer wajib diupload.' });
+        }
 
-// ==========================================================================
-// Konfigurasi Upload ke Memori (untuk Analisis AI, misal: Gemini Vision)
-// ==========================================================================
+        try {
+            // Buat FormData untuk mengirim file ke Laravel
+            const formData = new FormData();
+            formData.append('file', req.file.buffer, {
+                filename: `${req.file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(req.file.originalname)}`,
+                contentType: req.file.mimetype,
+            });
 
-// Gunakan memoryStorage, file TIDAK ditulis ke disk, hanya di RAM sementara
+            // Kirim file ke endpoint Laravel via HTTP POST
+            const response = await axios.post(laravelApiUrl, formData, {
+                headers: {
+                    ...formData.getHeaders(),
+                },
+            });
+
+            // Simpan informasi file dari response Laravel (misalnya path)
+            req.uploadedFile = response.data;
+            next();
+        } catch (error) {
+            console.error('Error uploading to Laravel:', error.message);
+            res.status(500).json({ message: 'Gagal mengupload bukti transfer ke server Laravel.' });
+        }
+    });
+});
+
+// -------------------------------------------------------------------------
+// Konfigurasi Upload ke Memori untuk Analisis AI (misal: Gemini Vision)
+// -------------------------------------------------------------------------
+
+// Gunakan memoryStorage untuk analisis AI
 const memoryStorage = multer.memoryStorage();
 
 // Filter: Hanya izinkan file gambar (image/*)
@@ -84,27 +110,23 @@ const imageFileFilter = (req, file, cb) => {
     }
 };
 
-// Instance multer untuk upload ke memory dengan filter & limit ukuran
+// Instance multer untuk upload ke memori dengan filter & limit ukuran
 const memoryUpload = multer({
     storage: memoryStorage,
     fileFilter: imageFileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // Maks 5MB
+    limits: { fileSize: 5 * 1024 * 1024 }, // Maks 5MB untuk gambar AI
 });
 
 // Middleware upload gambar latihan untuk AI (misal: field 'exerciseImage')
-// Menggunakan asyncHandler agar error dari multer bisa ditangani Express
 export const uploadExerciseImage = asyncHandler(async (req, res, next) => {
-    // Proses upload single file dengan field name 'exerciseImage'
     memoryUpload.single('exerciseImage')(req, res, (err) => {
         if (err) {
-            // Error dari multer (ukuran, filter, dsb)
             return res.status(400).json({ message: err.message });
         }
-        // Validasi: file wajib ada
         if (!req.file) {
             return res.status(400).json({ message: 'Gambar latihan wajib diupload.' });
         }
-        // Lanjut ke controller berikutnya kalau sukses
+        // File disimpan di req.file.buffer untuk diproses AI
         next();
     });
 });
@@ -112,8 +134,8 @@ export const uploadExerciseImage = asyncHandler(async (req, res, next) => {
 // -------------------------------------------------------------------------
 // Ringkasan Penggunaan
 // -------------------------------------------------------------------------
-// - uploadProof: Untuk bukti transfer, file disimpan ke disk di Laravel.
-//   Contoh pemakaian: router.post('/upload-proof', uploadProof.single('proof'), ...)
-// - uploadExerciseImage: Untuk gambar form checker AI, file hanya di memori.
-//   Contoh pemakaian: router.post('/ai/check-form', uploadExerciseImage, ...)
+// - uploadProof: Untuk bukti transfer, file diupload ke memori lalu dikirim ke API Laravel.
+//   Contoh pemakaian: router.post('/upload-proof', uploadProof, controller)
+// - uploadExerciseImage: Untuk gambar form checker AI, file hanya di memori untuk analisis AI.
+//   Contoh pemakaian: router.post('/ai/check-form', uploadExerciseImage, controller)
 // -------------------------------------------------------------------------

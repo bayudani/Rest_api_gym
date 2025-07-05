@@ -8,9 +8,9 @@ const redisClient = createClient({
     url: process.env.REDIS_URL
 });
 
-redisClient.on('error', (err) => console.log('Redis Client Error 😭', err));
+redisClient.on('error', (err) => console.log('Redis Client Error ', err));
 
-// Kita bungkus connect dalam fungsi biar bisa di-await di tempat lain
+//  bungkus connect dalam fungsi biar bisa di-await di tempat lain
 const connectRedis = async () => {
     try {
         await redisClient.connect();

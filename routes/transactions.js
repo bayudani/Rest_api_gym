@@ -10,7 +10,7 @@ import {uploadProof} from '../middleware/upload_middleware.js';
 const router = express.Router();
 
 // Create a new transaction
-router.post('/',authMiddleware, uploadProof.single('proof_image'),createTransactionController);
+router.post('/',authMiddleware, uploadProof,createTransactionController);
 // swagger documentation for create transaction
 /**
  * @swagger
