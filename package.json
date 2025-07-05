@@ -11,6 +11,8 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
+    "@google/genai": "^1.8.0",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.9.0",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",

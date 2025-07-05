@@ -11,87 +11,75 @@ import { findUserById } from "../models/user_models.js"; // <-- FIX: Pastikan ba
 
 // Create new transaction
 export const createTransactionController = async (req, res) => {
-  try {
-    const userId = req.user.id; // Ambil userId dari middleware otentikasi (misal: JWT)
-
-    //
-    const user = await findUserById(userId);
-    if (!user) {
-      // Jika user tidak ditemukan, jangan lanjut. Kasih error yang jelas.
-      return res.status(404).json({ message: "User tidak ditemukan. Mungkin token tidak valid atau user telah dihapus." });
-    }
-    // --- SELESAI PERBAIKAN VALIDASI ---
-
-    const { membership_package_id, amount, full_name, addres, phone } = req.body;
-    const numericAmount = parseInt(amount, 10);
-    const proofFile = req.file;
-
-    if (!proofFile) {
-      return res.status(400).json({ message: "Bukti transfer (gambar) wajib diupload." });
-    }
-
-    if (!membership_package_id || !amount || !full_name || !addres || !phone) {
-      return res.status(400).json({ message: "Semua field teks wajib diisi." });
-    }
-
-    const proofImagePath = `bukti-transfer/${proofFile.filename}`;
-
-    // Buat/update profil member (diset tidak aktif dulu)
-    await createMemberProfile({
-      user_id: userId,
-      full_name,
-      addres, // Sebaiknya diganti jadi 'address' di seluruh project biar konsisten
-      phone,
-      is_active: false,
-    });
-
-    // Buat record transaksi di database
-    const transaction = await createTransaction({
-      userId,
-      membership_package_id,
-      amount: numericAmount,
-      proof_image: proofImagePath,
-      status: "pending",
-    });
-
-    // --- BAGIAN KIRIM EMAIL NOTIFIKASI (SUDAH DIOPTIMASI) ---
     try {
+        const userId = req.user.id;
+        const user = await findUserById(userId);
 
-      const membership = await getMembershipById(membership_package_id);
+        if (!user) {
+            return res.status(404).json({ message: "User tidak ditemukan." });
+        }
 
-      if (membership) {
-        // Panggil fungsi pengirim email dari helper
-        await sendTransactionPendingEmail({
-          userEmail: user.email,
-          userName: user.name, // Menggunakan nama dari user yang sudah divalidasi
-          transactionId: transaction.id,
-          packageName: membership.name,
-          amount: transaction.amount,
+        // Ambil path gambar dari middleware uploadProof yang sudah jalan sebelumnya
+        const imagePath = req.uploadedFile?.path; // <-- PERUBAHAN KUNCI #1
+
+        // Validasi: Pastikan middleware upload berhasil memberikan path
+        if (!imagePath) { // <-- PERUBAHAN KUNCI #2
+            return res.status(400).json({ message: "Upload bukti transfer gagal atau path tidak ditemukan." });
+        }
+
+        const { membership_package_id, amount, full_name, addres, phone } = req.body;
+
+        if (!membership_package_id || !amount || !full_name || !addres || !phone) {
+            return res.status(400).json({ message: "Semua field teks wajib diisi." });
+        }
+        
+        const numericAmount = parseInt(amount, 10);
+
+        // Buat/update profil member
+        await createMemberProfile({
+            user_id: userId,
+            full_name,
+            addres,
+            phone,
+            is_active: false,
         });
-      } else {
-        console.warn("Membership tidak ditemukan, email notifikasi tidak terkirim.");
-      }
-    } catch (emailError) {
-      // Jika kirim email gagal, transaksi utama JANGAN digagalkan.
-      // Cukup catat errornya di log server.
-      console.error("KRUSIAL: Gagal mengirim email notifikasi transaksi:", emailError);
+
+        // Buat record transaksi dengan path yang sudah benar
+        const transaction = await createTransaction({
+            userId,
+            membership_package_id,
+            amount: numericAmount,
+            proof_image: imagePath, // <-- PERUBAHAN KUNCI #3
+            status: "pending",
+        });
+
+        // Bagian kirim email notifikasi (tidak ada perubahan, sudah bagus)
+        try {
+            const membership = await getMembershipById(membership_package_id);
+            if (membership) {
+                await sendTransactionPendingEmail({
+                    userEmail: user.email,
+                    userName: user.name,
+                    transactionId: transaction.id,
+                    packageName: membership.name,
+                    amount: transaction.amount,
+                });
+            } else {
+                console.warn("Membership tidak ditemukan, email notifikasi tidak terkirim.");
+            }
+        } catch (emailError) {
+            console.error("KRUSIAL: Gagal mengirim email notifikasi transaksi:", emailError);
+        }
+
+        res.status(201).json({
+            message: "Transaksi berhasil dibuat! Cek email kamu untuk info selanjutnya.",
+            data: transaction,
+        });
+
+    } catch (error) {
+        console.error("Error di createTransactionController:", error);
+        res.status(500).json({ message: "Terjadi kesalahan pada server saat membuat transaksi." });
     }
-    // --- SELESAI BAGIAN EMAIL ---
-
-    res.status(201).json({
-      message: "Transaksi berhasil dibuat! Cek email kamu untuk info selanjutnya.",
-      data: transaction,
-    });
-  } catch (error) {
-    // Log error asli dari Prisma atau service lain untuk debugging
-    console.error("Error di createTransactionController:", error);
-
-    // Memberikan response yang lebih bersahabat ke client
-    const errorMessage = error.code === 'P2003'
-      ? "Terjadi masalah relasi data. Pastikan semua data terkait valid."
-      : error.message || "Terjadi kesalahan pada server";
-    res.status(500).json({ message: errorMessage });
-  }
 };
 
 // // Get transactions by user

@@ -8,7 +8,6 @@ import { findUserById } from "../models/user_models.js";
 export const claimMemberReward = async (req, res) => {
     const { id: itemRewardId } = req.params; // Ambil ID item dari URL
     const { id: userId } = req.user; // Ambil ID user dari token (authMiddleware)
-
     const user = await findUserById(userId);
     try {
         const newClaim = await claimReward(userId, itemRewardId);
@@ -18,6 +17,8 @@ export const claimMemberReward = async (req, res) => {
         });
         // notif
         try {
+            
+            
             const reward = await getItemRewardById(itemRewardId);
             if(reward){
                 // panggil fungsi kirim email dari helpers

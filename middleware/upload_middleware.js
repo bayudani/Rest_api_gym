@@ -65,6 +65,8 @@ export const uploadProof = asyncHandler(async (req, res, next) => {
         if (err) {
             return res.status(400).json({ message: err.message });
         }
+                console.log('File diterima di Express:', req.file); 
+
         if (!req.file) {
             return res.status(400).json({ message: 'Bukti transfer wajib diupload.' });
         }

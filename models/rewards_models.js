@@ -1,87 +1,77 @@
 import prisma from "../prisma/db.js";
 
-
-
 /**
  * logika untuk member claim reward
-* @param {number | string} userId - ID dari user yang mengklaim.
+ * @param {number | string} userId - ID dari user yang mengklaim.
  * @param {number | string} itemRewardId - ID dari item reward yang mau diklaim.
  * @returns {Promise<Object>} Data record reward baru yang berhasil dibuat.
  * @throws {Error} Akan melempar error dengan pesan spesifik jika validasi gagal.
  */
 
+// models/rewards_models.js
+
 export const claimReward = async (userId, itemRewardId) => {
-    return await prisma.$transaction(async (tx) => {
-        // --- FIX: Gunakan nama model snake_case sesuai yang dikenali Prisma Client ---
-        // Sebelum: tx.memberProfile
-        // Sesudah: tx.member_profiles
-        const memberProfile = await tx.member_profiles.findUnique({
-            where: { user_id: BigInt(userId) }, // <-- INI DIA FIX-NYA!
-        });
 
-        // Sebelum: tx.itemReward
-        // Sesudah: tx.item_rewards
-        const itemReward = await tx.item_rewards.findUnique({
-            where: { id: BigInt(itemRewardId) },
-        });
-
-        // 2. Validasi awal
-        if (!memberProfile) {
-            throw new Error("Profil member tidak ditemukan.");
-        }
-        if (!itemReward) {
-            throw new Error("Item reward tidak ditemukan.");
-        }
-
-        // 3. Validasi UTAMA: Cek kecukupan poin member
-        if (memberProfile.point < itemReward.points) {
-            throw new Error("Poin Anda tidak cukup untuk menukarkan reward ini.");
-        }
-
-        // 4. Proses pengurangan poin
-        const updatedProfile = await tx.member_profiles.update({
-            where: { id: memberProfile.id },
-            data: {
-                point: {
-                    decrement: itemReward.points, // Kurangi poinnya
-                },
-            },
-        });
-
-        // 5. Catat transaksi klaim di tabel 'rewardss'
-        // Sebelum: tx.reward
-        // Sesudah: tx.rewardss
-        const newClaim = await tx.rewardss.create({
-            data: {
-                member_profile_id: memberProfile.id,
-                item_reward_id: itemReward.id,
-                reward_status: 'claimed', // Langsung set statusnya jadi 'claimed'
-            },
-        });
-
-        console.log(`SUCCESS: Poin ${memberProfile.fullName} dikurangi ${itemReward.points}. Sisa: ${updatedProfile.point}`);
-        return newClaim; // Kembalikan data klaim yang baru dibuat
+    // 1. Dapatkan profile_id dari userId
+    const memberProfile = await prisma.member_profiles.findUnique({
+        where: { user_id: BigInt(userId) },
     });
+
+    // 2. Dapatkan detail item reward
+    const itemReward = await prisma.item_rewards.findUnique({
+        where: { id: BigInt(itemRewardId) },
+    });
+
+    // 3. Validasi
+    if (!memberProfile) {
+        throw new Error("Profil member tidak ditemukan.");
+    }
+    if (!itemReward) {
+        throw new Error("Item reward tidak ditemukan.");
+    }
+    // Cek poin tetap penting, jangan sampai user klaim barang yang poinnya jauh di atas kemampuannya
+    if (memberProfile.point < itemReward.points) {
+        throw new Error("Poin Anda tidak cukup untuk menukarkan reward ini.");
+    }
+
+    const now = new Date();
+    const wibTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+
+    const newClaim = await prisma.rewardss.create({
+        data: {
+            member_profile_id: memberProfile.id,
+            item_reward_id: itemReward.id,
+            reward_status: "pending",
+            // Cukup panggil variabelnya langsung
+            created_at: wibTime
+        },
+    });
+
+    console.log(`PENDING: Reward ${itemReward.name} untuk ${memberProfile.fullName} tercatat.`);
+    return newClaim;
 };
 export const getRewardHistoryByUserId = async (userId) => {
     // Cari member profile dulu berdasarkan userId
     const memberProfile = await prisma.member_profiles.findUnique({
         where: {
-            user_id: BigInt(userId) // Pastikan dikonversi ke BigInt
+            user_id: BigInt(userId), // Pastikan dikonversi ke BigInt
         },
         // Pake `include` buat langsung join dan ambil data rewards terkait
         // Ini bisa dilakukan karena kita udah nambahin relasi di schema.prisma
         include: {
             rewardss: {
                 // ambil yang status claimed
-                where: {
-                    reward_status: 'claimed'
+                // where: {
+                //     reward_status: "claimed",
+                // },
+                include: {
+                    item_reward: true, // Asumsi relasi di schema.prisma sudah didefinisikan
                 },
                 orderBy: {
-                    created_at: 'desc'
-                }
-            }
-        }
+                    created_at: "desc",
+                },
+            },
+        },
     });
 
     // Kalo profil member nggak ada, atau dia belum punya reward,
@@ -93,4 +83,3 @@ export const getRewardHistoryByUserId = async (userId) => {
     // Balikin cuma data rewards-nya aja
     return memberProfile.rewardss;
 };
-

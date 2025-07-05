@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
  */
 const transporter = nodemailer.createTransport({
     service: "gmail",
-    
+
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -98,9 +98,16 @@ const sendTransactionPendingEmail = async ({
  * [BARU] Mengirim email konfirmasi bahwa transaksi berhasil dan membership aktif.
  * @param {object} details - Detail konfirmasi.
  */
-const sendTransactionConfirmedEmail = async ({ userEmail, userName, endDate }) => {
-    const formattedEndDate = new Date(endDate).toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+const sendTransactionConfirmedEmail = async ({
+    userEmail,
+    userName,
+    endDate,
+}) => {
+    const formattedEndDate = new Date(endDate).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
     });
 
     await transporter.sendMail({
@@ -133,7 +140,12 @@ const sendTransactionConfirmedEmail = async ({ userEmail, userName, endDate }) =
  * [BARU] Mengirim email notifikasi bahwa transaksi ditolak.
  * @param {object} details - Detail penolakan.
  */
-const sendTransactionRejectedEmail = async ({ userEmail, userName, transactionId, reason }) => {
+const sendTransactionRejectedEmail = async ({
+    userEmail,
+    userName,
+    transactionId,
+    reason,
+}) => {
     await transporter.sendMail({
         from: `"FitID 🏋️" <${process.env.EMAIL_USER}>`,
         to: userEmail,
@@ -147,7 +159,8 @@ const sendTransactionRejectedEmail = async ({ userEmail, userName, transactionId
                 </p>
                 <div style="margin: 25px 0; padding: 15px; background-color: #ffebee; border-left: 5px solid #d32f2f; border-radius: 5px;">
                 <p style="margin: 0; font-size: 14px;"><strong>Alasan Penolakan:</strong></p>
-                <p style="margin: 5px 0 0 0; font-size: 16px;">${reason || 'Bukti pembayaran tidak valid atau tidak sesuai.'}</p>
+                <p style="margin: 5px 0 0 0; font-size: 16px;">${reason || "Bukti pembayaran tidak valid atau tidak sesuai."
+            }</p>
                 </div>
                 <p style="font-size: 16px;">
                 Jangan khawatir, anda bisa coba lakukan transaksi lagi dengan bukti pembayaran yang benar. Kalau ada pertanyaan, jangan ragu hubungi tim support kami ya.
@@ -173,7 +186,7 @@ const sendRewardClaimedEmail = async ({ userEmail, userName, rewardName }) => {
                 <p style="font-size: 16px;">
                 Kami senang menginformasikan bahwa klaim reward anda untuk <strong>${rewardName}</strong> telah berhasil diproses.
                 </p>
-                <p style="font-size: 16px; text-align: center;">
+                <p style="font-size: 16px; text-align: left;">
                 Terima kasih telah menjadi bagian dari komunitas FitID! Silahkan ambil reward di FitID dan tunjukkan bukti email ini!
                 </p>
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
@@ -184,4 +197,10 @@ const sendRewardClaimedEmail = async ({ userEmail, userName, rewardName }) => {
     });
 };
 
-export { sendVerificationEmail, sendTransactionPendingEmail, sendTransactionConfirmedEmail, sendTransactionRejectedEmail, sendRewardClaimedEmail };
+export {
+    sendVerificationEmail,
+    sendTransactionPendingEmail,
+    sendTransactionConfirmedEmail,
+    sendTransactionRejectedEmail,
+    sendRewardClaimedEmail,
+};

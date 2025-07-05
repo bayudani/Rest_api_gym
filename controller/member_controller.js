@@ -11,13 +11,13 @@ const DEFAULT_EXPIRE_TIME = 60 * 60 * 24; // 1 day in seconds
 export const getMemberProfile = async (req, res) => {
     const userId = req.user.id;
     try {
-        // ambil dari Redis dulu
-        const cacheKey = `member_profile:${userId}`;
-        const cachedProfile = await redisClient.get(cacheKey);
-        if (cachedProfile) {
-            console.log('Mengambil profil member dari cache Redis');
-            return res.json(JSON.parse(cachedProfile));
-        }
+        // // ambil dari Redis dulu
+        // const cacheKey = `member_profile:${userId}`;
+        // const cachedProfile = await redisClient.get(cacheKey);
+        // if (cachedProfile) {
+        //     console.log('Mengambil profil member dari cache Redis');
+        //     return res.json(JSON.parse(cachedProfile));
+        // }
         console.log('Mengambil profil member dari database');
         // 1. Ambil profil lengkap dari model yang sudah kita perbaiki
         const profile = await getMemberProfileByUserId(userId);
@@ -41,10 +41,7 @@ export const getMemberProfile = async (req, res) => {
                 membership_status: membership_status,
             });
         }
-        // Simpan profil ke cache Redis dengan masa berlaku 1 hari
-        await redisClient.set(cacheKey, JSON.stringify(profile), {
-            EX: DEFAULT_EXPIRE_TIME // Set expire time to 1 day
-        });
+        
         
         // 4. Cek flag is_active
         if (!profile.is_active) {
@@ -55,6 +52,10 @@ export const getMemberProfile = async (req, res) => {
             });
         }
 
+        // Simpan profil ke cache Redis dengan masa berlaku 1 hari
+        // await redisClient.set(cacheKey, JSON.stringify(profile), {
+        //     EX: DEFAULT_EXPIRE_TIME // Set expire time to 1 day
+        // });
         
         //   info status ke response biar frontend gampang
         res.json({ ...profile, membership_status });

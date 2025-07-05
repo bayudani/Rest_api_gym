@@ -344,6 +344,8 @@ model item_rewards {
   updated_at DateTime? @db.Timestamp(0)
 
   // Relasi: Satu item reward bisa diklaim berkali-kali oleh member berbeda
+  // Relasi balik ke rewardss
+  rewardss rewardss[]
 }
 
 model rewardss {
@@ -358,6 +360,9 @@ model rewardss {
   @@index([member_profile_id], map: "rewardss_member_profile_id_foreign")
 
    // FIX: Definisikan relasi secara eksplisit (Ini yang hilang)
+
+// TAMBAHKAN RELASI INI (INI KUNCINYA)
+  item_reward       item_rewards    @relation(fields: [item_reward_id], references: [id])
 
    member_profile member_profiles @relation(fields: [member_profile_id], references: [id])
 
