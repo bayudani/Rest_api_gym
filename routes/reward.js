@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMemberRewardHistory,claimMemberReward } from '../controller/rewards_controller.js';
+import { getMemberRewardHistory,claimMemberReward,finalizeMemberReward } from '../controller/rewards_controller.js';
 import authMiddleware from '../middleware/auth_middleware.js';
 const router = express.Router();
 
@@ -65,5 +65,30 @@ router.post('/:id/claim', authMiddleware, claimMemberReward);
  *                   type: array
  *                   items:
  *                     type: object
+ */
+
+// PUT /api/rewards/:claimId/finalize
+router.put('/:claimId/finalize', authMiddleware, finalizeMemberReward);
+// swagger documentation
+/**
+ * @swagger
+ * /api/rewards/{claimId}/finalize:
+ *   put:
+ *     summary: Finalisasi reward oleh member setelah diterima
+ *     tags: [Rewards]
+ *     parameters:
+ *       - in: path
+ *         name: claimId
+ *         required: true
+ *         description: ID klaim reward yang ingin di-finalisasi
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Reward berhasil finalisasi
+ *       400:
+ *         description: Klaim reward tidak ditemukan
+ *       500:
+ *         description: Terjadi kesalahan pada server
  */
 export default router;

@@ -393,4 +393,5 @@ enum transactions_status {
 enum rewardss_reward_status {
   pending
   claimed
+  confirmed
 }

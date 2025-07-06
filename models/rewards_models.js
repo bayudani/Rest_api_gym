@@ -1,11 +1,12 @@
 import prisma from "../prisma/db.js";
 
 /**
- * logika untuk member claim reward
- * @param {number | string} userId - ID dari user yang mengklaim.
- * @param {number | string} itemRewardId - ID dari item reward yang mau diklaim.
+ * Logika untuk member MEMBUAT PERMINTAAN reward.
+ * Fungsi ini sekarang dinamai 'createPendingReward' untuk kejelasan.
+ * @param {string | number} userId - ID dari user yang mengklaim.
+ * @param {string | number} itemRewardId - ID dari item reward yang mau diklaim.
  * @returns {Promise<Object>} Data record reward baru yang berhasil dibuat.
- * @throws {Error} Akan melempar error dengan pesan spesifik jika validasi gagal.
+ * @throws {Error} Akan melempar error jika validasi gagal.
  */
 
 // models/rewards_models.js
@@ -50,6 +51,58 @@ export const claimReward = async (userId, itemRewardId) => {
     console.log(`PENDING: Reward ${itemReward.name} untuk ${memberProfile.fullName} tercatat.`);
     return newClaim;
 };
+
+/**
+ * Mencari satu data klaim reward berdasarkan ID uniknya.
+ * @param {string | number} claimId - ID dari tabel 'rewardss'.
+ * @returns {Promise<Object|null>} Data klaim atau null jika tidak ditemukan.
+ */
+export const findClaimById = async (claimId) => {
+    return await prisma.rewardss.findUnique({
+        where: {
+            id: BigInt(claimId),
+        },
+        // Kita butuh userId untuk validasi kepemilikan
+        include: {
+            member_profile: {
+                select: {
+                    user_id: true
+                }
+            }
+        }
+    });
+};
+
+/**
+ * Mengubah status dari sebuah klaim reward.
+ * @param {string | number} claimId - ID dari tabel 'rewardss'.
+ * @param {'pending' | 'confirmed' | 'claimed'} newStatus - Status baru untuk reward.
+ * @returns {Promise<Object>} Data klaim yang sudah di-update.
+ */
+export const updateClaimStatus = async (claimId, newStatus) => {
+    return await prisma.rewardss.update({
+        where: {
+            id: BigInt(claimId),
+        },
+        data: {
+            reward_status: newStatus,
+            updated_at: new Date(),
+        },
+    });
+};
+
+/**
+ * Mengambil detail satu item reward berdasarkan ID.
+ * Berguna untuk notifikasi email.
+ * @param {string | number} itemRewardId - ID dari item reward.
+ * @returns {Promise<Object|null>}
+ */
+export const getItemRewardById = async (itemRewardId) => {
+    return await prisma.item_rewards.findUnique({
+        where: { id: BigInt(itemRewardId) },
+    });
+};
+
 export const getRewardHistoryByUserId = async (userId) => {
     // Cari member profile dulu berdasarkan userId
     const memberProfile = await prisma.member_profiles.findUnique({

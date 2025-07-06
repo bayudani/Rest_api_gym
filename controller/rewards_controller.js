@@ -1,4 +1,5 @@
-import { getRewardHistoryByUserId, claimReward } from "../models/rewards_models.js";
+import { getRewardHistoryByUserId, claimReward,findClaimById,
+    updateClaimStatus, } from "../models/rewards_models.js";
 import { sendRewardClaimedEmail } from "../helpers/mailer.js";
 import { getItemRewardById } from "../models/itemRewards_models.js";
 import { findUserById } from "../models/user_models.js";
@@ -17,8 +18,6 @@ export const claimMemberReward = async (req, res) => {
         });
         // notif
         try {
-            
-            
             const reward = await getItemRewardById(itemRewardId);
             if(reward){
                 // panggil fungsi kirim email dari helpers
@@ -48,6 +47,45 @@ export const claimMemberReward = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Finalisasi reward oleh member setelah diterima
+ * @route   PUT /api/rewards/:claimId/finalize
+ * @access  Private (Member)
+ */
+export const finalizeMemberReward = async (req, res) => {
+    const { claimId } = req.params;
+    const { id: userId } = req.user;
+
+    try {
+        // 1. Cari data klaim reward-nya
+        const claimRecord = await findClaimById(claimId);
+
+        // 2. Validasi
+        if (!claimRecord) {
+            return res.status(404).json({ error: "Data klaim reward tidak ditemukan." });
+        }
+        // Pastikan yang akses adalah pemilik reward
+        if (claimRecord.member_profile.user_id !== BigInt(userId)) {
+            return res.status(403).json({ error: "Akses ditolak. Ini bukan reward kamu." });
+        }
+        // Pastikan statusnya 'confirmed'
+        if (claimRecord.reward_status !== 'confirmed') {
+            return res.status(400).json({ error: `Reward ini belum dikonfirmasi admin atau sudah selesai.` });
+        }
+
+        // 3. Jika lolos validasi, update statusnya ke 'claimed'
+        const updatedClaim = await updateClaimStatus(claimId, 'claimed');
+
+        res.status(200).json({
+            message: "Mantap! Reward sudah kamu konfirmasi diterima. Enjoy!",
+            data: updatedClaim,
+        });
+
+    } catch (error) {
+        console.error("Error di finalizeMemberReward:", error.message);
+        res.status(500).json({ error: "Servernya lagi error, gagal finalisasi reward." });
+    }
+};
 /**
  * Controller untuk mengambil histori reward member yang sedang login.
  */
