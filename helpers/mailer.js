@@ -175,22 +175,77 @@ const sendTransactionRejectedEmail = async ({
 
 // notifikasi email klaim reward
 const sendRewardClaimedEmail = async ({ userEmail, userName, rewardName }) => {
+    // Kita bikin ID klaim unik biar makin sah
+    const claimId = `FITID-${new Date().getTime().toString().slice(-8)}`;
+    const claimDate = new Date().toLocaleString('id-ID', {
+        dateStyle: 'long',
+        timeStyle: 'short'
+    });
+    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+    // Path logo yang BENAR (tanpa /public)
+    const LOGO_URL = `https://imgur.com/sxcDCRO.png`;
+
+    // URL untuk QR Code, bisa diisi data apa aja yang relevan
+    const qrCodeData = `claimId=${claimId}&user=${userName}&reward=${rewardName}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrCodeData)}`;
+
     await transporter.sendMail({
         from: `"FitID 🏋️" <${process.env.EMAIL_USER}>`,
         to: userEmail,
-        subject: "Klaim Reward Berhasil! 🎉",
+        subject: `[Klaim Berhasil] Bukti Klaim Reward ${rewardName}`,
         html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; background-color: #f9f9f9;">
-            <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                <h2 style="color: #4CAF50; text-align: center;">Selamat, ${userName}! Klaim reward anda berhasil!</h2>
-                <p style="font-size: 16px;">
-                Kami senang menginformasikan bahwa klaim reward anda untuk <strong>${rewardName}</strong> telah berhasil diproses.
-                </p>
-                <p style="font-size: 16px; text-align: left;">
-                Terima kasih telah menjadi bagian dari komunitas FitID! Silahkan ambil reward di FitID dan tunjukkan bukti email ini!
-                </p>
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-                <p style="font-size: 12px; color: #aaa; text-align: center;">FitID Gym App • ${new Date().getFullYear()}</p>
+        <div style="font-family: 'Courier New', Courier, monospace; line-height: 1.6; padding: 20px; background-color: #f4f4f4;">
+            <div style="max-width: 400px; margin: auto; background: white; padding: 25px; border: 1px dashed #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="${LOGO_URL}" alt="Logo FitID" style="max-width: 150px; margin-bottom: 15px;">
+
+                    <h2 style="margin: 0; font-size: 24px; color: #333;">FitID Gym</h2>
+                    <p style="margin: 0; font-size: 14px; color: #555;">BUKTI KLAIM REWARD</p>
+                </div>
+
+                <div style="font-size: 14px; color: #333;">
+                    <p style="margin: 2px 0;"><strong>No. Klaim:</strong> ${claimId}</p>
+                    <p style="margin: 2px 0;"><strong>Tanggal:</strong> ${claimDate}</p>
+                    <p style="margin: 2px 0; margin-bottom: 15px;"><strong>Untuk:</strong> ${userName}</p>
+                </div>
+                
+                <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
+                
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 8px 0; border-bottom: 1px solid #eee;">DESKRIPSI</th>
+                            <th style="text-align: right; padding: 8px 0; border-bottom: 1px solid #eee;">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 8px 0;">${rewardName}</td>
+                            <td style="text-align: right; padding: 8px 0; font-weight: bold; color: #4CAF50;">DIKLAIM</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="font-size: 14px; font-weight: bold; margin: 0;">Pindai untuk Verifikasi</p>
+                    <img src="${qrCodeUrl}" alt="QR Code Verifikasi" style="margin-top: 10px;">
+                    <p style="font-size: 12px; color: #777; margin-top: 15px;">
+                        Tunjukkan email ini kepada staf kami di FitID untuk mengambil reward-mu.
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="font-size: 14px; color: #333; margin: 0;">
+                        Terima kasih telah menjadi member setia FitID! 💪
+                    </p>
+                    <p style="font-size: 12px; color: #aaa; margin-top: 15px;">
+                        &copy; ${new Date().getFullYear()} FitID Gym App
+                    </p>
+                </div>
+
             </div>
         </div>
         `,

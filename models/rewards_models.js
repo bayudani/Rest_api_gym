@@ -79,7 +79,44 @@ export const findClaimById = async (claimId) => {
  * @param {'pending' | 'confirmed' | 'claimed'} newStatus - Status baru untuk reward.
  * @returns {Promise<Object>} Data klaim yang sudah di-update.
  */
-export const updateClaimStatus = async (claimId, newStatus) => {
+export const updateClaimStatus = async (claimId, newStatus,userId) => {
+    // 1. Dapatkan profile_id dari userId
+    const memberProfile = await prisma.member_profiles.findUnique({
+        where: { user_id: BigInt(userId) },
+    });
+
+    
+    // Ambil data klaimnya dulu
+    const claim = await prisma.rewardss.findUnique({
+        where: { id: BigInt(claimId) },
+    });
+
+    if (!claim) {
+        throw new Error("Klaim reward tidak ditemukan.");
+    }
+
+    // Ambil item reward untuk tau berapa poin yang harus dikurangi
+    const itemReward = await prisma.item_rewards.findUnique({
+        where: { id: claim.item_reward_id },
+    });
+
+    if (!itemReward) {
+        throw new Error("Item reward tidak ditemukan.");
+    }
+
+    // Kurangi poin member (hati-hati! cuma kurangi saat status jadi 'claimed')
+    if (newStatus === 'claimed') {
+        await prisma.member_profiles.update({
+            where: { id: claim.member_profile_id },
+            data: {
+                point: {
+                    decrement: itemReward.points,
+                },
+            },
+        });
+    }
+
+    // Update status reward
     return await prisma.rewardss.update({
         where: {
             id: BigInt(claimId),
@@ -90,6 +127,7 @@ export const updateClaimStatus = async (claimId, newStatus) => {
         },
     });
 };
+
 
 /**
  * Mengambil detail satu item reward berdasarkan ID.

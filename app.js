@@ -25,6 +25,7 @@ dotenv.config();
 app.use(cors());
 // log with morgan
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+app.use(express.static('public')); 
 
 // === Custom logger biar tampil kayak: [tgl jam] - IP - METHOD URL ===
 app.use((req, res, next) => {

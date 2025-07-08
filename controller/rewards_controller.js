@@ -16,22 +16,7 @@ export const claimMemberReward = async (req, res) => {
             message: "Hore! Reward berhasil diklaim.",
             data: newClaim,
         });
-        // notif
-        try {
-            const reward = await getItemRewardById(itemRewardId);
-            if(reward){
-                // panggil fungsi kirim email dari helpers
-                await sendRewardClaimedEmail({
-                    userEmail : user.email,
-                    userName:user.name,
-                    rewardName:reward.name,
-                })
-            }else{
-                console.warn ("Reward tidak ditemukan, email notifikasi tidak terkirim")
-            }
-        } catch (emailError) {
-            console.error("Gagal mengirim email", emailError);
-        }
+        
     } catch (error) {
         console.error("Error di claimMemberReward:", error.message);
 
@@ -54,7 +39,10 @@ export const claimMemberReward = async (req, res) => {
  */
 export const finalizeMemberReward = async (req, res) => {
     const { claimId } = req.params;
+    // const { id: itemRewardId } = req.params; // Ambil ID item dari URL
+    
     const { id: userId } = req.user;
+    const user = await findUserById(userId);
 
     try {
         // 1. Cari data klaim reward-nya
@@ -74,7 +62,26 @@ export const finalizeMemberReward = async (req, res) => {
         }
 
         // 3. Jika lolos validasi, update statusnya ke 'claimed'
-        const updatedClaim = await updateClaimStatus(claimId, 'claimed');
+        const updatedClaim = await updateClaimStatus(claimId, 'claimed',userId);
+
+        // notif
+        try {
+            const itemRewardId = claimRecord.item_reward_id; 
+            const reward = await getItemRewardById(itemRewardId);
+
+            if(reward){
+                // panggil fungsi kirim email dari helpers
+                await sendRewardClaimedEmail({
+                    userEmail : user.email,
+                    userName:user.name,
+                    rewardName:reward.name,
+                })
+            }else{
+                console.warn ("Reward tidak ditemukan, email notifikasi tidak terkirim")
+            }
+        } catch (emailError) {
+            console.error("Gagal mengirim email", emailError);
+        }
 
         res.status(200).json({
             message: "Mantap! Reward sudah kamu konfirmasi diterima. Enjoy!",
