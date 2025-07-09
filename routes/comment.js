@@ -4,6 +4,7 @@ import {
   postCommentBySlug,
   listCommentsByArticleSlug,
   deleteCommentBySlug,
+  getCommentCount
 } from "../controller/comment_controller.js";
 import authMiddleware from "../middleware/auth_middleware.js";
 
@@ -17,6 +18,10 @@ router.post("/article/:slug", authMiddleware, postCommentBySlug);
 
 // Hapus komentar user berdasarkan slug post
 router.delete("/article/:slug", authMiddleware, deleteCommentBySlug);
+
+// get comment count
+router.get("/article/count/:slug", getCommentCount);
+
 export default router;
 
 /**

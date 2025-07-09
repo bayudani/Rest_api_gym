@@ -68,3 +68,10 @@ export const findPostBySlug = async (slug) => {
         where: { slug },
     });
 };
+
+// count comment
+export const countComment = async (postId)=>{
+    return await prisma.fblog_comments.count({
+    where: { post_id: BigInt(postId) }
+    })
+}

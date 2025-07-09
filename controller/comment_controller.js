@@ -6,8 +6,10 @@ import {
     findCommentById,
     findPostBySlug,
     getCommentsByArticleSlug,
+    countComment
 } from '../models/comment_models.js';
 
+import { findPublishedPostBySlug } from '../models/article_models.js';
 export const listComments = async (req, res) => {
     try {
         const { slug } = req.params; // pastikan kamu kirim slug dari frontend
@@ -151,5 +153,18 @@ export const deleteCommentBySlug = async (req, res) => {
         res.json({ message: 'Komentar berhasil dihapus berdasarkan slug artikel.' });
     } catch (error) {
         res.status(500).json({ message: 'Gagal menghapus komentar.', error: error.message });
+    }
+};
+
+export const getCommentCount = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const post = await findPublishedPostBySlug(slug);
+        if (!post) return res.status(404).json({ message: 'Post tidak ditemukan.' });
+
+        const totalComment = await countComment(post.id);
+        res.json({ comment: totalComment });
+    } catch (error) {
+        res.status(500).json({ message: 'Terjadi kesalahan saat mengambil jumlah like.', error: error.message });
     }
 };

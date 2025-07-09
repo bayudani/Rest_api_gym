@@ -394,4 +394,5 @@ enum rewardss_reward_status {
   pending
   claimed
   confirmed
+  rejected
 }
