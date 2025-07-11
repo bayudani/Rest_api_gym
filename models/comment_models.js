@@ -28,7 +28,7 @@ export const getCommentsByArticleSlug = async (slug) => {
             post_id: post.id
         },
         include: {
-            // user: true,
+            user: true,
             // post: true
         },
         // orderBy: {

@@ -79,7 +79,7 @@ app.use("/api/ai", formChacker);
 
 // Tes endpoint root
 app.get("/", (req, res) => {
-  res.send("Welcome to the API gym");
+  res.send("Welcome to the API FitID Gym App");
 });
 
 const PORT = process.env.PORT || 3001;
