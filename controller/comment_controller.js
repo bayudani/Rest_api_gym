@@ -12,12 +12,12 @@ import {
 import { findPublishedPostBySlug } from '../models/article_models.js';
 export const listComments = async (req, res) => {
     try {
-        const { slug } = req.params; // pastikan kamu kirim slug dari frontend
+        const { slug } = req.params; //slug dari fe
         const comments = await getCommentsByArticleSlug(slug);
 
         const formatted = comments.map(comment => ({
             id: comment.id,
-            content: comment.comment.replace(/<[^>]*>?/gm, ''), // bersihin tag HTML
+            content: comment.comment.replace(/<[^>]*>?/gm, ''), // bersihkn tag HTML
             post_title: comment.post?.title ?? '[judul tidak ditemukan]',
             user_name: comment.user?.name ?? '[anonim]',
             created_at: comment.created_at.toISOString(),

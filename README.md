@@ -4,8 +4,12 @@ REST API backend profesional untuk aplikasi Gym, dikembangkan menggunakan **Expr
 
 ![CI](https://github.com/bayudani/Rest_api_gym/actions/workflows/ci.yml/badge.svg) ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-
 ![Last Commit](https://img.shields.io/github/last-commit/bayudani/Rest_api_gym?color=blue) ![Language](https://img.shields.io/github/languages/top/bayudani/Rest_api_gym) ![npm](https://img.shields.io/badge/npm->=_6.0.0-blue) ![Express](https://img.shields.io/badge/EX%20Express-black?logo=express) ![JSON](https://img.shields.io/badge/JSON-black?logo=json) ![Markdown](https://img.shields.io/badge/Markdown-black?logo=markdown) ![npm](https://img.shields.io/badge/npm-red?logo=npm) ![.ENV](https://img.shields.io/badge/.ENV-yellow?logo=dotenv) ![JavaScript](https://img.shields.io/badge/JavaScript-yellow?logo=javascript) ![Nodemon](https://img.shields.io/badge/Nodemon-brightgreen?logo=nodemon) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-blue?logo=githubactions) ![Prisma](https://img.shields.io/badge/Prisma-34495e?logo=prisma) ![Axios](https://img.shields.io/badge/Axios-7B1FA2?logo=axios) ![Redis](https://img.shields.io/badge/redis-cache-red?logo=redis)
+
+
+![1752488381144](image/README/1752488381144.png)
+
+
 
 ## 🚀 Fitur Utama
 

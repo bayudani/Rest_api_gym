@@ -181,13 +181,13 @@ const sendRewardClaimedEmail = async ({ userEmail, userName, rewardName }) => {
         dateStyle: 'long',
         timeStyle: 'short'
     });
-    const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+    // const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
     // Path logo yang BENAR (tanpa /public)
     const LOGO_URL = `https://imgur.com/sxcDCRO.png`;
 
     // URL untuk QR Code, bisa diisi data apa aja yang relevan
-    const qrCodeData = `claimId=${claimId}&user=${userName}&reward=${rewardName}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrCodeData)}`;
+    // const qrCodeData = `claimId=${claimId}&user=${userName}&reward=${rewardName}`;
+    // const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrCodeData)}`;
 
     await transporter.sendMail({
         from: `"FitID 🏋️" <${process.env.EMAIL_USER}>`,
@@ -229,13 +229,7 @@ const sendRewardClaimedEmail = async ({ userEmail, userName, rewardName }) => {
 
                 <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
 
-                <div style="text-align: center; margin-top: 20px;">
-                    <p style="font-size: 14px; font-weight: bold; margin: 0;">Pindai untuk Verifikasi</p>
-                    <img src="${qrCodeUrl}" alt="QR Code Verifikasi" style="margin-top: 10px;">
-                    <p style="font-size: 12px; color: #777; margin-top: 15px;">
-                        Tunjukkan email ini kepada staf kami di FitID untuk mengambil reward-mu.
-                    </p>
-                </div>
+            
 
                 <div style="text-align: center; margin-top: 30px;">
                     <p style="font-size: 14px; color: #333; margin: 0;">

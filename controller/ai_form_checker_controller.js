@@ -9,28 +9,10 @@ import axios from 'axios';
  *          untuk mendapatkan analisis postur dengan feedback dalam format JSON.
  * @route   POST /api/ai/check-form
  * @access  Private (memerlukan login)
- * 
- * Request Body (form-data):
- *   - exerciseName: String (nama latihan, contoh: squat, push-up, dll)
- *   - image: File gambar (user saat latihan, wajib)
- * 
- * Response Success (Status 200):
- *   {
- *     is_correct: boolean,      // Apakah postur sudah benar (90%+)
- *     score: number,            // Skor 0-100
- *     feedback_points: [        // 3 feedback utama
- *       { type: "good"|"bad", point: "string" },
- *       ...
- *     ],
- *     summary: string           // Kesimpulan & motivasi singkat
- *   }
- * 
- * Response Error:
- *   - 400: exerciseName/image tidak diisi
- *   - 500: API Key tidak tersedia / gagal analisa
  */
+
 export const checkExerciseForm = asyncHandler(async (req, res) => {
-    // 1. Ambil data dari request body dan file upload (melalui middleware, misal: multer)
+    // 1. Ambil data dari request body dan file upload
     const { exerciseName } = req.body;
     const imageFile = req.file;
 
@@ -40,7 +22,7 @@ export const checkExerciseForm = asyncHandler(async (req, res) => {
         throw new Error('Nama latihan harus diisi.');
     }
 
-    // Validasi: Gambar wajib diupload (backup, walau biasanya sudah ditangani middleware)
+    // Validasi: Gambar wajib diupload 
     if (!imageFile) {
         res.status(400);
         throw new Error('Gambar latihan wajib diupload.');
@@ -56,7 +38,7 @@ export const checkExerciseForm = asyncHandler(async (req, res) => {
         throw new Error('API Key Gemini belum diatur di server.');
     }
 
-    // 4. Siapkan URL endpoint Gemini Vision (gunakan model terbaru untuk analisa gambar)
+    // 4. Siapkan URL endpoint Gemini Vision API
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
 
     // 5. Siapkan body permintaan ke Gemini: isi prompt instruksi dan lampirkan gambar (base64)

@@ -104,7 +104,7 @@ export const updateClaimStatus = async (claimId, newStatus,userId) => {
         throw new Error("Item reward tidak ditemukan.");
     }
 
-    // Kurangi poin member (hati-hati! cuma kurangi saat status jadi 'claimed')
+    // Kurangi poin member 
     if (newStatus === 'claimed') {
         await prisma.member_profiles.update({
             where: { id: claim.member_profile_id },

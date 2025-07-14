@@ -39,7 +39,7 @@ app.use((req, res, next) => {
 // Proxy untuk Laravel
 // Semua request ke /laravel/... akan diteruskan ke http://localhost:8000
 app.use('/laravel', createProxyMiddleware({
-  target: process.env.LARAVEL_IMAGE, // Alamat server Laravel kamu
+  target: process.env.LARAVEL_IMAGE, // Alamat server Laravel 
   changeOrigin: true,
   pathRewrite: {
     '^/laravel': '', // Hapus '/laravel' dari path sebelum diteruskan

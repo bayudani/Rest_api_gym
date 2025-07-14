@@ -20,7 +20,7 @@ export const getCommentsByArticleSlug = async (slug) => {
         }
     });
 
-    if (!post) return []; // atau null sesuai kebutuhanmu
+    if (!post) return []; 
 
     return await prisma.fblog_comments.findMany({
         where: {

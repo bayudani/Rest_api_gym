@@ -24,7 +24,7 @@ export const getMemberProfile = async (req, res) => {
 
         // 2. Cek apakah profil ada
         if (!profile) {
-            // Pakai 404 Not Found karena datanya memang tidak ada
+            
             return res.status(404).json({ error: "Profil member tidak ditemukan." });
         }
 
@@ -35,7 +35,7 @@ export const getMemberProfile = async (req, res) => {
         // 3. Cek apakah masa berlaku sudah habis (expired)
         if (profile.end_date && new Date(profile.end_date) < now) {
             membership_status = 'expired';
-            // Pakai 403 Forbidden karena user ada tapi tidak punya hak akses
+            // forbiden akses jika sudah expired
             return res.status(403).json({
                 error: "Masa berlaku membership Anda telah habis.",
                 membership_status: membership_status,

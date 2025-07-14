@@ -24,7 +24,7 @@ export const getArticleBySlug = async (slug) => {
 
 
 // add like to article
-// import prisma from '../prisma/db.js';
+
 
 // Cari post published berdasarkan ID
 // Ambil post published berdasarkan slug

@@ -119,7 +119,7 @@ const memoryUpload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // Maks 5MB untuk gambar AI
 });
 
-// Middleware upload gambar latihan untuk AI (misal: field 'exerciseImage')
+// Middleware upload gambar latihan untuk AI 
 export const uploadExerciseImage = asyncHandler(async (req, res, next) => {
     memoryUpload.single('exerciseImage')(req, res, (err) => {
         if (err) {

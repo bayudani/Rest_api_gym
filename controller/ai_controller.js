@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import axios from 'axios';
-import prisma from '../prisma/db.js'; // <-- 1. IMPORT PRISMA CLIENT
+import prisma from '../prisma/db.js'; 
 import redisClient from '../helpers/redis-client.js';
 
 /**
@@ -53,7 +53,7 @@ export const handleChat = asyncHandler(async (req, res) => {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
 
     const requestBody = {
-        // <-- 3. UPGRADE SYSTEM INSTRUCTION DENGAN NAMA & ATURAN BARU -->
+        // <-- 3. SYSTEM INSTRUCTION DENGAN NAMA & ATURAN BARU -->
         "system_instruction": {
             "parts": [
                 {
@@ -100,7 +100,7 @@ export const handleChat = asyncHandler(async (req, res) => {
 
         console.log('Chat history saved to Redis:', { userMessageToSave, aiMessageToSave });
 
-         // Set masa berlaku untuk riwayat chat ini, misal 1 hari
+         // Set masa berlaku untuk riwayat chat ini,  1 hari
         await redisClient.expire(redisKey, 60 * 60 * 24);
 
         res.status(200).json({ reply: aiReply });

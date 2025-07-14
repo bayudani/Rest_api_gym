@@ -177,9 +177,9 @@ export const profile = async (req, res) => {
 };
 
 // update user
-// controllers/user_controller.js (lanjutin dari file lo)
+
 export const updateUserInfo = async (req, res) => {
-    console.log("USER PAYLOAD:", req.user); // <-- Tambahin di sini bro!
+    console.log("USER PAYLOAD:", req.user); 
 
     const { name, email } = req.body;
 
@@ -212,7 +212,7 @@ export const updateUserInfo = async (req, res) => {
 
 // update pas
 export const updateUserPassword = async (req, res) => {
-    console.log("USER PAYLOAD:", req.user); // <-- Tambahin di sini bro!
+    console.log("USER PAYLOAD:", req.user); 
 
     const { currentPassword, newPassword, confirmPassword } = req.body;
 

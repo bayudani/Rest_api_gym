@@ -3,11 +3,11 @@ import {
   getTransactionsByUser,
   findTransactionById,
   updateTransactionStatus,
-} from "../models/transactions_models.js"; // asumsinya yang di atas tadi di file ini
+} from "../models/transactions_models.js";
 import { createMemberProfile } from "../models/member_models.js";
 import { getMembershipById } from "../models/membership_models.js";
 import { sendTransactionPendingEmail, sendTransactionConfirmedEmail, sendTransactionRejectedEmail, } from "../helpers/mailer.js"; // <-- Impor dari file helper
-import { findUserById } from "../models/user_models.js"; // <-- FIX: Pastikan baris ini ada dan tidak di-comment
+import { findUserById } from "../models/user_models.js"; 
 
 // Create new transaction
 export const createTransactionController = async (req, res) => {
@@ -20,10 +20,10 @@ export const createTransactionController = async (req, res) => {
         }
 
         // Ambil path gambar dari middleware uploadProof yang sudah jalan sebelumnya
-        const imagePath = req.uploadedFile?.path; // <-- PERUBAHAN KUNCI #1
+        const imagePath = req.uploadedFile?.path; 
 
         // Validasi: Pastikan middleware upload berhasil memberikan path
-        if (!imagePath) { // <-- PERUBAHAN KUNCI #2
+        if (!imagePath) { 
             return res.status(400).json({ message: "Upload bukti transfer gagal atau path tidak ditemukan." });
         }
 
@@ -49,7 +49,7 @@ export const createTransactionController = async (req, res) => {
             userId,
             membership_package_id,
             amount: numericAmount,
-            proof_image: imagePath, // <-- PERUBAHAN KUNCI #3
+            proof_image: imagePath, 
             status: "pending",
         });
 
@@ -129,7 +129,7 @@ export const updateTransactionStatusController = async (req, res) => {
       return res.status(404).json({ message: "Transaksi tidak ditemukan untuk diupdate." });
     }
 
-    // !! BAGIAN PENTING !!
+    // 2. Ambil user terkait transaksi ini
     // Pastikan user diambil dari DB SEBELUM blok if/else.
     // Ini adalah sumber variabel `user` untuk email.
     const user = await findUserById(updatedTransaction.userId);

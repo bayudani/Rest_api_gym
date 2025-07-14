@@ -48,10 +48,10 @@ export const getMemberProfileByUserId = async (userId) => {
             full_name: true,
             addres: true,
             phone: true,
-            is_active: true,     // <-- PENTING
-            start_date: true,    // <-- PENTING
-            end_date: true,      // <-- PENTING
-            point: true          // <-- Ambil point juga sekalian biar efisien
+            is_active: true,     
+            start_date: true,    
+            end_date: true,      
+            point: true          
         },
     });
 };
@@ -74,7 +74,7 @@ export const getMemberAttends = async (userId) => {
     // cari member dlu
     const profile = await prisma.member_profiles.findUnique({
         where: {
-            user_id: BigInt(userId), // pastikan userId di sini sesuai dengan tipe data yang diharapkan
+            user_id: BigInt(userId), 
         }
     });
     if (!profile) {
